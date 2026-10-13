@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import pool from './config/db.js';
+import errorhandler from './middlewares/error.middleware.js';
 
 dotenv.config();
 
@@ -29,6 +30,7 @@ app.get("/api/health", (req, res) => {
 });
 
 //error handler
+app.use(errorhandler);
 
 const startServer = async () => {
   try {
