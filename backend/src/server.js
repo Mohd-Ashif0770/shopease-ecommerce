@@ -4,6 +4,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import pool from './config/db.js';
 import errorhandler from './middlewares/error.middleware.js';
+import authRoutes from './routes/auth.routes.js';
 
 dotenv.config();
 
@@ -28,6 +29,9 @@ app.get("/api/health", (req, res) => {
     message: "ShopEase API is running",
   });
 });
+
+//routes
+app.use("/api/auth", authRoutes)
 
 //error handler
 app.use(errorhandler);
