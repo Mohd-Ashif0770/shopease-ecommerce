@@ -206,3 +206,104 @@ export const verifyOtpService = async ( email, otp ) => {
     connection.release();
   }
 };
+
+
+export const resendOtpService = async ({ email }) => {
+  const connection = await pool.getConnection();
+  let userId;
+  let otp;
+  let otpId;
+
+  try {
+    await connection.beginTransaction();
+
+    // 1. Fetch and lock the user row
+    const [users] = await connection.execute(
+      `SELECT id, name, email, email_verified_at FROM users WHERE email = ? LIMIT 1 FOR UPDATE`,
+      [email]
+    );
+
+    // Specific Error: Account does not exist
+    if (!users.length) {
+      await connection.commit();
+      throw appError(404, "No account found with this email address.");
+    }
+
+    const user = users[0];
+    userId = user.id;
+
+    // Specific Error: Account is already verified
+    if (user.email_verified_at !== null) {
+      await connection.commit();
+      throw appError(400, "This email address has already been verified.");
+    }
+
+    // 2. Cooldown Check using matching UTC timezones
+    const [cooldownRows] = await connection.execute(
+      `SELECT created_at > CURRENT_TIMESTAMP - INTERVAL 60 SECOND AS cooldown_active 
+       FROM email_otps 
+       WHERE user_id = ? AND purpose = 'registration' 
+       ORDER BY created_at DESC, id DESC LIMIT 1 FOR UPDATE`,
+      [userId]
+    );
+
+    // Specific Error: Rate limited / Cooldown active
+    if (cooldownRows.length > 0 && cooldownRows[0].cooldown_active) {
+      await connection.commit();
+      throw appError(429, "Please wait 60 seconds before requesting another OTP.");
+    }
+
+    // 3. Invalidate outstanding registration OTPs
+    await connection.execute(
+      `UPDATE email_otps SET consumed_at = UTC_TIMESTAMP() 
+       WHERE user_id = ? AND purpose = 'registration' AND consumed_at IS NULL`,
+      [userId]
+    );
+
+    // 4. Generate and save the new OTP
+    otp = generateOTP();
+    const otpHash = hashOTP(otp);
+
+    const [result] = await connection.execute(
+      `INSERT INTO email_otps (user_id, otp_hash, purpose, expires_at) 
+       VALUES (?, ?, 'registration', DATE_ADD(UTC_TIMESTAMP(), INTERVAL 5 MINUTE))`,
+      [userId, otpHash]
+    );
+
+    otpId = result.insertId;
+    await connection.commit();
+
+    // 5. Send email outside the heavy DB transaction block
+    try {
+      await sendOtpEmail({
+        to: user.email,
+        name: user.name,
+        otp,
+        purpose: "registration",
+      });
+    } catch (emailError) {
+      // Cleanup the generated OTP so it can't be used
+      await pool.execute(
+        `UPDATE email_otps SET consumed_at = UTC_TIMESTAMP() WHERE id = ? AND consumed_at IS NULL`,
+        [otpId]
+      );
+      console.error("Resend OTP email failed for user", userId, emailError.message);
+      
+      // Specific Error: Third-party provider failure
+      throw appError(503, "The email delivery service failed. Please try again in a few moments.");
+    }
+
+    return { sent: true, message: "A new verification code has been sent to your email." };
+
+  } catch (error) {
+    await connection.rollback().catch(() => {});
+    // If it's one of our explicit appErrors, pass it through directly
+    if (error.statusCode) throw error;
+    
+    // Fallback for unexpected system errors (e.g., database connection dropped)
+    throw appError(500, "An internal server error occurred while processing your request.");
+  } finally {
+    connection.release();
+  }
+};
+

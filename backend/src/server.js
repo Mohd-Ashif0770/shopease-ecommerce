@@ -5,6 +5,7 @@ import cookieParser from 'cookie-parser';
 import pool from './config/db.js';
 import errorhandler from './middlewares/error.middleware.js';
 import authRoutes from './routes/auth.routes.js';
+import { connectRedis } from "./config/connectRedis.js";
 
 dotenv.config();
 
@@ -40,6 +41,8 @@ const startServer = async () => {
   try {
      await pool.query("SELECT 1");
      console.log("Database connected successfully");
+     
+     await connectRedis();
 
     app.listen(PORT, () => {
       console.log(`Server running on http://localhost:${PORT}`);

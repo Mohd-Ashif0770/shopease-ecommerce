@@ -23,3 +23,9 @@ export const verifyEmailSchema = z.object({
     .length(6, "OTP must be exactly 6 digits")
     .regex(/^\d+$/, "OTP must contain only numbers"),
 });
+
+
+export const resendOtpSchema = z.object({
+  email: z.email("Please provide a valid email address"),
+});
+
