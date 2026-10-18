@@ -3,6 +3,9 @@ import appError from "../utils/appError.js";
 import bcrypt from "bcrypt";
 import { generateOTP, hashOTP, verifyOTP } from "../utils/otp.js";
 import { sendOtpEmail } from "../utils/email.js";
+import jwt from "jsonwebtoken";
+import { createRefreshSession, revokeRefreshSession, rotateRefreshSession } from "./refreshSession.service.js";
+
 
 export const registerService = async (body) => {
   const { name, email, password } = body;
@@ -306,4 +309,160 @@ export const resendOtpService = async ({ email }) => {
     connection.release();
   }
 };
+
+
+export const loginService = async ({ email, password, rememberMe = false }) => {
+  const [users] = await pool.execute(
+    `SELECT id, name, email, password, role,
+            email_verified_at, is_active
+     FROM users
+     WHERE email = ?
+     LIMIT 1`,
+    [email],
+  );
+
+  const user = users[0];
+
+  // Use the same generic response for unknown email and wrong password.
+  if (!user) {
+    throw appError(401, "Invalid email or password");
+  }
+
+  if (!user.is_active) {
+    throw appError(403, "Your account is inactive");
+  }
+
+  if (!user.email_verified_at) {
+    throw appError(403, "Please verify your email before logging in");
+  }
+
+  // A Google-only account may not have a password.
+  if (!user.password) {
+    throw appError(
+      401,
+      "This account does not have a password. Please use Google login",
+    );
+  }
+
+  const passwordMatches = await bcrypt.compare(password, user.password);
+
+  if (!passwordMatches) {
+    throw appError(401, "Invalid email or password");
+  }
+
+  if (!process.env.JWT_SECRET) {
+    throw new Error("JWT_SECRET is not configured");
+  }
+
+  const accessToken = jwt.sign(
+    {
+      userId: user.id,
+      role: user.role,
+    },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: process.env.JWT_ACCESS_EXPIRES_IN || "15m",
+    },
+  );
+
+  const { refreshToken, session } = await createRefreshSession(
+    user.id,
+    rememberMe,
+  );
+
+  return {
+    accessToken,
+    refreshToken,
+    rememberMe,
+    session,
+    user: {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+    },
+  };
+};
+
+
+export const refreshTokenService = async (oldRefreshToken) => {
+  if (!oldRefreshToken) {
+    throw appError(401, "Refresh token is required");
+  }
+
+  const rotated = await rotateRefreshSession(oldRefreshToken);
+
+  if (!rotated) {
+    throw appError(401, "Invalid or expired refresh token");
+  }
+
+  try {
+    const [users] = await pool.execute(
+      `SELECT id, role
+       FROM users
+       WHERE id = ? AND is_active = TRUE
+         AND email_verified_at IS NOT NULL
+       LIMIT 1`,
+      [rotated.session.userId],
+    );
+
+    if (!users.length) {
+      await revokeRefreshSession(rotated.refreshToken);
+      throw appError(401, "User account is unavailable");
+    }
+
+    const user = users[0];
+
+    const accessToken = jwt.sign(
+      {
+        userId: user.id,
+        role: user.role,
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: process.env.JWT_ACCESS_EXPIRES_IN || "15m",
+      },
+    );
+
+    return {
+      accessToken,
+      refreshToken: rotated.refreshToken,
+      rememberMe: rotated.session.rememberMe,
+    };
+  } catch (error) {
+    // Do not leave the replacement session active if token issuance fails.
+    await revokeRefreshSession(rotated.refreshToken).catch(() => {});
+    throw error;
+  }
+};
+
+
+export const logoutService = async (refreshToken) => {
+  if (!refreshToken) {
+    return;
+  }
+
+  await revokeRefreshSession(refreshToken);
+};
+
+
+export const getProfileService = async (userId) => {
+  const [users] = await pool.execute(
+    `SELECT id, name, email, role, email_verified_at, created_at
+     FROM users
+     WHERE id = ? AND is_active = TRUE
+     LIMIT 1`,
+    [userId],
+  );
+
+  if (!users.length) {
+    throw appError(401, "User account not found or inactive");
+  }
+
+  return users[0];
+};
+
+
+
+
 

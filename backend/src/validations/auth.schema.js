@@ -13,8 +13,9 @@ export const registerSchema = z
   });
 
 export const loginSchema = z.object({
-  email: z.email("Invalid email address"),
+  email: z.email("Invalid email address").transform((value) => value.toLowerCase()),
   password: z.string().min(4, "Password must be at least 4 characters"),
+  rememberMe: z.boolean().default(false),
 });
 
 export const verifyEmailSchema = z.object({
