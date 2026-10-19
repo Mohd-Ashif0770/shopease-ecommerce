@@ -1,0 +1,27 @@
+
+import api from "./axios";
+
+export const loginAPI = async (credentials) => {
+  const response = await api.post("/auth/login", credentials);
+  return response.data;
+};
+
+export const refreshTokenAPI = async () => {
+  const response = await api.post("/auth/refresh");
+  return response.data;
+};
+
+export const logoutAPI = async () => {
+  const response = await api.post("/auth/logout");
+  return response.data;
+};
+
+export const getProfileAPI = async (accessToken) => {
+  const response = await api.get("/auth/profile", {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+
+  return response.data;
+};
