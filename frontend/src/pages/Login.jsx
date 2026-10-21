@@ -5,17 +5,18 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowRight, Eye, EyeOff, LockKeyhole, Mail } from "lucide-react";
 import { toast } from "sonner";
-
+import { GoogleLogin } from "@react-oauth/google";
 import { loginSchema } from "../validations/auth.validation";
-import { loginAPI } from "../apis/auth.api";
+import { loginAPI, googleAuthAPI } from "../apis/auth.api";
 import {
   setCredentials,
   setLoading,
   setError,
   clearAuthError,
 } from "../redux/features/authSlice";
-import googlIcon from "../assets/google-logo.jpg";
 import LoginRightSection from "../components/LoginRightSection";
+import { useEffect } from "react";
+import { useRef } from "react";
 
 const Login = () => {
   const dispatch = useDispatch();
@@ -23,10 +24,13 @@ const Login = () => {
 
   const { loading } = useSelector((state) => state.auth);
   const [showPassword, setShowPassword] = useState(false);
+  const googleBtnWrapRef = useRef(null);
+  const [googleButtonWidth, setGoogleButtonWidth] = useState(null);
 
   const {
     register,
     handleSubmit,
+    getValues,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(loginSchema),
@@ -59,6 +63,55 @@ const Login = () => {
       dispatch(setLoading(false));
     }
   };
+
+  const handleGoogleSuccess = async (googleResponse) => {
+    if (!googleResponse.credential) {
+      toast.error("Google sign-in did not return a credential.");
+      return;
+    }
+
+    try {
+      dispatch(setLoading(true));
+      dispatch(clearAuthError());
+
+      const response = await googleAuthAPI({
+        credential: googleResponse.credential,
+        rememberMe: getValues("rememberMe") ?? false,
+      });
+
+      const { user, accessToken } = response.data;
+
+      dispatch(setCredentials({ user, accessToken }));
+
+      toast.success("Signed in with Google successfully.");
+      navigate("/");
+    } catch (error) {
+      const message =
+        error.response?.data?.message ||
+        "Google sign-in failed. Please try again.";
+
+      dispatch(setError(message));
+      toast.error(message);
+    } finally {
+      dispatch(setLoading(false));
+    }
+  };
+
+  useEffect(() => {
+    const el = googleBtnWrapRef.current;
+    if (!el) return;
+
+    const updateWidth = () => {
+      const width = Math.floor(el.getBoundingClientRect().width);
+      setGoogleButtonWidth(Math.min(Math.max(width, 200), 400));
+    };
+
+    updateWidth();
+    const observer = new ResizeObserver(updateWidth);
+    observer.observe(el);
+
+    return () => observer.disconnect();
+  }, []);
 
   const inputClass = `
     h-[46px] w-full rounded-xl border border-slate-300
@@ -211,14 +264,20 @@ const Login = () => {
           </div>
 
           {/* Google button */}
-          <button
-            type="button"
-            onClick={() => toast.info("Google sign-in will be available soon.")}
-            className="flex h-[46px] sm:h-[48px] w-full cursor-pointer items-center justify-center gap-2.5 rounded-xl border border-slate-300 bg-white text-base font-semibold text-slate-800 transition hover:bg-slate-50"
-          >
-            <img src={googlIcon} alt="google icon" className="w-6" />
-            Continue with Google
-          </button>
+
+          <div className="w-full flex justify-center"></div>
+          <div ref={googleBtnWrapRef} className="flex w-full justify-center">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={() => toast.error("Google sign-in was unsuccessful.")}
+              text="continue_with"
+              shape="rectangular"
+              theme="outline"
+              logo_alignment="center"
+              size="large"
+              width={String(googleButtonWidth)}
+            />
+          </div>
 
           {/* Signup */}
           <p className="mt-5 sm:mt-6 text-center text-xs sm:text-sm text-slate-500">

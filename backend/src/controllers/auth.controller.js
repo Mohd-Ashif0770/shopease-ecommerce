@@ -10,6 +10,9 @@ import {
   verifyOtpService,
   verifyResetOtpService,
 } from "../services/auth.service.js";
+import jwt from 'jsonwebtoken';
+import { googleAuthService } from "../services/googleAuth.service.js";
+import { createRefreshSession } from "../services/refreshSession.service.js";
 import { successResponse } from "../utils/response.js";
 
 export const regiterController = async (req, res, next) => {
@@ -156,6 +159,58 @@ export const resetPasswordController = async (req, res, next) => {
     const result = await resetPasswordService(req.body);
 
     return successResponse(res, 200, result.message);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Google auth
+
+export const googleAuthController = async (req, res, next) => {
+  try {
+    const { credential, rememberMe = false } = req.body;
+
+    if (typeof rememberMe !== "boolean") {
+      return res.status(400).json({
+        success: false,
+        message: "rememberMe must be a boolean",
+      });
+    }
+
+    const user = await googleAuthService(credential);
+
+    const accessToken = jwt.sign(
+      {
+        userId: user.id,
+        role: user.role,
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: process.env.JWT_ACCESS_EXPIRES_IN || "15m",
+      },
+    );
+
+    const refreshToken = await createRefreshSession(user.id, rememberMe);
+
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/api/auth",
+      ...(rememberMe ? { maxAge: 7 * 24 * 60 * 60 * 1000 } : {}),
+    });
+
+    const payload = {
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+      accessToken,
+    };
+
+    return successResponse(res, 200, "Google sign-in successful", payload);
   } catch (error) {
     next(error);
   }

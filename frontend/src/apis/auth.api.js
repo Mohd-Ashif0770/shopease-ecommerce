@@ -46,12 +46,18 @@ export const forgotPasswordAPI = async (data) => {
   return response.data;
 };
 
-export const verifyResetOtpAPI =async (data) => {
+export const verifyResetOtpAPI = async (data) => {
   const response = await api.post("/auth/verify-reset-otp", data);
   return response.data;
 };
 
 export const resetPasswordAPI = async (data) => {
   const response = await api.post("/auth/reset-password", data);
+  return response.data;
+};
+
+//google auth
+export const googleAuthAPI = async (data) => {
+  const response = await api.post("/auth/google", data);
   return response.data;
 };
