@@ -10,7 +10,6 @@ import {
   EyeOff,
   LockKeyhole,
   LoaderCircle,
-  CheckCircle2,
 } from "lucide-react";
 import { toast } from "sonner";
 

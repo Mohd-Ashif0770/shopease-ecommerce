@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -14,8 +13,7 @@ import {
   setError,
   clearAuthError,
 } from "../redux/features/authSlice";
-
-import interiorImage from "../assets/login-interior.png";
+import RegisterRightSection from "../components/RegisterRightSection";
 
 const VerifyOtp = () => {
   const dispatch = useDispatch();
@@ -53,7 +51,7 @@ const VerifyOtp = () => {
     dispatch(clearAuthError());
 
     try {
-      await verifyOtpAPI({email, otp});
+      await verifyOtpAPI({ email, otp });
 
       toast.success("Email verified successfully. You can now log in.");
 
@@ -115,8 +113,8 @@ const VerifyOtp = () => {
           </h1>
 
           <p className="mt-3 text-sm leading-6 text-slate-500">
-            Your email address is missing from this verification session.
-            Please return to registration and try again.
+            Your email address is missing from this verification session. Please
+            return to registration and try again.
           </p>
 
           <Link
@@ -135,7 +133,6 @@ const VerifyOtp = () => {
       {/* LEFT: OTP form */}
       <section className="flex min-h-screen items-center justify-center px-6 py-8 sm:px-12 lg:h-screen lg:min-h-0 lg:overflow-y-auto lg:px-10 lg:py-6 xl:px-16">
         <div className="my-auto w-full max-w-[440px]">
-
           <div className="mb-7">
             <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-800/10 text-emerald-800">
               <MailCheck size={28} strokeWidth={1.7} />
@@ -209,9 +206,7 @@ const VerifyOtp = () => {
           </form>
 
           <div className="mt-6 text-center">
-            <p className="text-sm text-slate-500">
-              Didn't receive the code?
-            </p>
+            <p className="text-sm text-slate-500">Didn't receive the code?</p>
 
             <button
               type="button"
@@ -236,31 +231,7 @@ const VerifyOtp = () => {
       </section>
 
       {/* RIGHT: Reused lifestyle image */}
-      <aside className="relative hidden h-screen overflow-hidden lg:block">
-        <img
-          src={interiorImage}
-          alt="Warm minimalist living room with an olive armchair and indoor plants"
-          className="absolute inset-0 h-full w-full object-cover object-center"
-        />
-
-        <div className="absolute inset-0 bg-gradient-to-r from-[#f4f0e8]/35 via-[#f4f0e8]/10 to-transparent" />
-
-        <div className="absolute left-[8%] top-[24%] z-10 max-w-[390px] xl:left-[10%] xl:top-[24%]">
-          <div className="mb-3 h-[2px] w-10 bg-emerald-800" />
-
-          <h2 className="font-heading text-2xl font-bold leading-tight tracking-tight text-slate-950 xl:text-[35px]">
-            Almost There
-            <span className="mt-1 block text-emerald-800">
-              Shop with Ease
-            </span>
-          </h2>
-
-          <p className="mt-4 max-w-[300px] text-sm leading-7 text-slate-600 xl:text-base">
-            Verify your email to complete your account setup and start
-            discovering products you'll love.
-          </p>
-        </div>
-      </aside>
+      <RegisterRightSection />
     </main>
   );
 };
