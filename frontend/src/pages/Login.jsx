@@ -264,8 +264,6 @@ const Login = () => {
           </div>
 
           {/* Google button */}
-
-          <div className="w-full flex justify-center"></div>
           <div ref={googleBtnWrapRef} className="flex w-full justify-center">
             <GoogleLogin
               onSuccess={handleGoogleSuccess}
