@@ -32,3 +32,14 @@ export const getProfileAPI = async (accessToken) => {
 
   return response.data;
 };
+
+
+export const verifyOtpAPI = async (data) => {
+  const response = await api.post("/auth/verify-otp", data);
+  return response.data;
+};
+
+export const resendOtpAPI = async (data) => {
+  const response = await api.post("/auth/resend-otp", data);
+  return response.data;
+};

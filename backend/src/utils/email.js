@@ -5,8 +5,8 @@ export const sendOtpEmail = async ({ to, otp, purpose }) => {
   const isRegistration = purpose === "registration";
 
   const subject = isRegistration
-    ? "Verify your ShopSphere account"
-    : "Reset your ShopSphere password";
+    ? "Verify your ShopEase account"
+    : "Reset your ShopEase password";
 
   const heading = isRegistration
     ? "Verify your email address"
@@ -18,7 +18,7 @@ export const sendOtpEmail = async ({ to, otp, purpose }) => {
 
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 520px; margin: auto; padding: 24px; color: #222;">
-      <h2 style="margin-bottom: 24px;">ShopSphere</h2>
+      <h2 style="margin-bottom: 24px;">ShopEase</h2>
 
       <h3>${heading}</h3>
 
@@ -39,7 +39,7 @@ export const sendOtpEmail = async ({ to, otp, purpose }) => {
   `;
 
   return transporter.sendMail({
-    from: `"ShopSphere" <${process.env.SMTP_FROM}>`,
+    from: `"ShopEase" <${process.env.SMTP_FROM}>`,
     to,
     subject,
     text: `${heading}. ${message} Your OTP is ${otp}. It expires in 5 minutes.`,

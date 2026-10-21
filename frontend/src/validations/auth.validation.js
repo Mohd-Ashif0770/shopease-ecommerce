@@ -24,3 +24,10 @@ export const registerSchema = z
     message: "Passwords do not match",
     path: ["confirmPassword"],
   });
+
+  export const verifyOtpSchema = z.object({
+  otp: z
+    .string()
+    .trim()
+    .regex(/^\d{6}$/, "Enter the 6-digit verification code"),
+});

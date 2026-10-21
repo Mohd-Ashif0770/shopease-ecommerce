@@ -463,6 +463,348 @@ export const getProfileService = async (userId) => {
 };
 
 
+export const forgotPasswordService = async ({ email }) => {
+  const genericMessage =
+    "If an account exists for this email, you will receive password reset instructions shortly.";
+
+  const connection = await pool.getConnection();
+
+  let userId;
+  let userName;
+  let otp;
+  let otpId;
+
+  try {
+    await connection.beginTransaction();
+
+    const [users] = await connection.execute(
+      `SELECT id, name, password
+       FROM users
+       WHERE email = ? AND is_active = TRUE
+       LIMIT 1
+       FOR UPDATE`,
+      [email],
+    );
+
+    // Do not reveal whether an account exists.
+    // Google-only accounts do not have a password to reset.
+    if (!users.length || !users[0].password) {
+      await connection.commit();
+      return { message: genericMessage };
+    }
+
+    const user = users[0];
+
+    userId = user.id;
+    userName = user.name;
+
+    // Enforce a 60-second cooldown between reset OTP requests.
+    const [recentOtps] = await connection.execute(
+      `SELECT id
+       FROM email_otps
+       WHERE user_id = ?
+         AND purpose = 'forgot_password'
+         AND created_at > DATE_SUB(UTC_TIMESTAMP(), INTERVAL 60 SECOND)
+       ORDER BY created_at DESC
+       LIMIT 1`,
+      [userId],
+    );
+
+    if (recentOtps.length > 0) {
+      await connection.commit();
+      return { message: genericMessage };
+    }
+
+    // Invalidate previous unused reset OTPs.
+    await connection.execute(
+      `UPDATE email_otps
+       SET consumed_at = UTC_TIMESTAMP()
+       WHERE user_id = ?
+         AND purpose = 'forgot_password'
+         AND consumed_at IS NULL`,
+      [userId],
+    );
+
+    otp = generateOTP();
+
+    const otpHash = hashOTP(otp);
+
+    const [result] = await connection.execute(
+      `INSERT INTO email_otps
+        (user_id, otp_hash, purpose, expires_at)
+       VALUES (
+        ?, ?, 'forgot_password',
+        DATE_ADD(UTC_TIMESTAMP(), INTERVAL 5 MINUTE)
+       )`,
+      [userId, otpHash],
+    );
+
+    otpId = result.insertId;
+
+    await connection.commit();
+  } catch (error) {
+    await connection.rollback().catch(() => {});
+    throw error;
+  } finally {
+    connection.release();
+  }
+
+  // Send email after committing the database transaction.
+  try {
+    await sendOtpEmail({
+      to: email,
+      name: userName,
+      otp,
+      purpose: "forgot_password",
+    });
+  } catch (emailError) {
+    // Invalidate the OTP if the email could not be delivered.
+    await pool.execute(
+      `UPDATE email_otps
+       SET consumed_at = UTC_TIMESTAMP()
+       WHERE id = ?
+         AND consumed_at IS NULL`,
+      [otpId],
+    );
+
+    console.error(
+      "Password reset email failed for user",
+      userId,
+      emailError.message,
+    );
+
+    throw appError(
+      503,
+      "Unable to send the password reset email. Please try again later.",
+    );
+  }
+
+  return { message: genericMessage };
+};
+
+
+
+
+// Verify a password-reset OTP without consuming it.
+// The OTP is consumed only when the password is successfully reset.
+export const verifyResetOtpService = async ({ email, otp }) => {
+  const connection = await pool.getConnection();
+  let failureMessage = null;
+
+  try {
+    await connection.beginTransaction();
+
+    const [users] = await connection.execute(
+      `SELECT id
+       FROM users
+       WHERE email = ? AND is_active = TRUE
+       LIMIT 1
+       FOR UPDATE`,
+      [email],
+    );
+
+    if (!users.length) {
+      failureMessage = "Invalid or expired verification code";
+    } else {
+      const userId = users[0].id;
+
+      const [otps] = await connection.execute(
+        `SELECT id, otp_hash, expires_at, attempts, consumed_at
+         FROM email_otps
+         WHERE user_id = ?
+           AND purpose = 'forgot_password'
+         ORDER BY created_at DESC, id DESC
+         LIMIT 1
+         FOR UPDATE`,
+        [userId],
+      );
+
+      const record = otps[0];
+
+      if (!record || record.consumed_at) {
+        failureMessage = "Invalid or expired verification code";
+      } else if (record.attempts >= 5) {
+        failureMessage = "Too many attempts. Request a new verification code";
+      } else {
+        const [expiry] = await connection.execute(
+          `SELECT expires_at > UTC_TIMESTAMP() AS is_valid
+           FROM email_otps
+           WHERE id = ?`,
+          [record.id],
+        );
+
+        if (!expiry[0]?.is_valid) {
+          await connection.execute(
+            `UPDATE email_otps
+             SET consumed_at = UTC_TIMESTAMP()
+             WHERE id = ? AND consumed_at IS NULL`,
+            [record.id],
+          );
+
+          failureMessage = "Verification code has expired. Request a new code";
+        } else {
+          const isValid = verifyOTP(otp, record.otp_hash);
+
+          if (!isValid) {
+            await connection.execute(
+              `UPDATE email_otps
+               SET attempts = attempts + 1
+               WHERE id = ?`,
+              [record.id],
+            );
+
+            failureMessage =
+              record.attempts + 1 >= 5
+                ? "Too many attempts. Request a new verification code"
+                : "Invalid verification code";
+          }
+        }
+      }
+    }
+
+    // Commit attempt increments and expiry updates before reporting failure.
+    await connection.commit();
+
+    if (failureMessage) {
+      throw appError(400, failureMessage);
+    }
+
+    return {
+      message: "Verification code is valid. You can reset your password.",
+    };
+  } catch (error) {
+    if (connection) {
+      await connection.rollback().catch(() => {});
+    }
+    throw error;
+  } finally {
+    connection.release();
+  }
+};
+
+// Verify the OTP again and change the password atomically.
+export const resetPasswordService = async ({
+  email,
+  otp,
+  password,
+}) => {
+  const connection = await pool.getConnection();
+
+  try {
+    await connection.beginTransaction();
+
+    const [users] = await connection.execute(
+      `SELECT id
+       FROM users
+       WHERE email = ? AND is_active = TRUE
+       LIMIT 1
+       FOR UPDATE`,
+      [email],
+    );
+
+    if (!users.length) {
+      throw appError(400, "Invalid or expired verification code");
+    }
+
+    const userId = users[0].id;
+
+    const [otps] = await connection.execute(
+      `SELECT id, otp_hash, expires_at, attempts, consumed_at
+       FROM email_otps
+       WHERE user_id = ?
+         AND purpose = 'forgot_password'
+       ORDER BY created_at DESC, id DESC
+       LIMIT 1
+       FOR UPDATE`,
+      [userId],
+    );
+
+    const record = otps[0];
+
+    if (!record || record.consumed_at) {
+      throw appError(400, "Invalid or expired verification code");
+    }
+
+    if (record.attempts >= 5) {
+      throw appError(
+        400,
+        "Too many attempts. Request a new verification code",
+      );
+    }
+
+    const [expiry] = await connection.execute(
+      `SELECT expires_at > UTC_TIMESTAMP() AS is_valid
+       FROM email_otps
+       WHERE id = ?`,
+      [record.id],
+    );
+
+    if (!expiry[0]?.is_valid) {
+      await connection.execute(
+        `UPDATE email_otps
+         SET consumed_at = UTC_TIMESTAMP()
+         WHERE id = ? AND consumed_at IS NULL`,
+        [record.id],
+      );
+
+      throw appError(
+        400,
+        "Verification code has expired. Request a new code",
+      );
+    }
+
+    const isValid = verifyOTP(otp, record.otp_hash);
+
+    if (!isValid) {
+      await connection.execute(
+        `UPDATE email_otps
+         SET attempts = attempts + 1
+         WHERE id = ?`,
+        [record.id],
+      );
+
+      throw appError(
+        400,
+        record.attempts + 1 >= 5
+          ? "Too many attempts. Request a new verification code"
+          : "Invalid verification code",
+      );
+    }
+
+    const passwordHash = await bcrypt.hash(password, 12);
+
+    await connection.execute(
+      `UPDATE users
+       SET password = ?
+       WHERE id = ?`,
+      [passwordHash, userId],
+    );
+
+    // Consume the reset OTP and invalidate any other unused reset OTPs.
+    await connection.execute(
+      `UPDATE email_otps
+       SET consumed_at = UTC_TIMESTAMP()
+       WHERE user_id = ?
+         AND purpose = 'forgot_password'
+         AND consumed_at IS NULL`,
+      [userId],
+    );
+
+    await connection.commit();
+
+    return {
+      message: "Password reset successful. Please log in with your new password.",
+    };
+  } catch (error) {
+    await connection.rollback().catch(() => {});
+    throw error;
+  } finally {
+    connection.release();
+  }
+};
+
+
+
 
 
 

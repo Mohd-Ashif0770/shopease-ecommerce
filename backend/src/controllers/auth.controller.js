@@ -1,11 +1,14 @@
 import {
-    getProfileService,
+  forgotPasswordService,
+  getProfileService,
   loginService,
   logoutService,
   refreshTokenService,
   registerService,
   resendOtpService,
+  resetPasswordService,
   verifyOtpService,
+  verifyResetOtpService,
 } from "../services/auth.service.js";
 import { successResponse } from "../utils/response.js";
 
@@ -122,7 +125,37 @@ export const getProfileController = async (req, res, next) => {
   try {
     const user = await getProfileService(req.user.id);
 
-    return successResponse(res, 200, "Profile fetched successfully", user)
+    return successResponse(res, 200, "Profile fetched successfully", user);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const forgotPasswordController = async (req, res, next) => {
+  try {
+    const result = await forgotPasswordService(req.body);
+
+    return successResponse(res, 200, result.message);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const verifyResetOtpController = async (req, res, next) => {
+  try {
+    const result = await verifyResetOtpService(req.body);
+
+    return successResponse(res, 200, result.message);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const resetPasswordController = async (req, res, next) => {
+  try {
+    const result = await resetPasswordService(req.body);
+
+    return successResponse(res, 200, result.message);
   } catch (error) {
     next(error);
   }
