@@ -504,7 +504,7 @@ export const forgotPasswordService = async ({ email }) => {
        FROM email_otps
        WHERE user_id = ?
          AND purpose = 'forgot_password'
-         AND created_at > DATE_SUB(UTC_TIMESTAMP(), INTERVAL 60 SECOND)
+         AND created_at > DATE_SUB(NOW(), INTERVAL 60 SECOND)
        ORDER BY created_at DESC
        LIMIT 1`,
       [userId],
@@ -581,8 +581,6 @@ export const forgotPasswordService = async ({ email }) => {
 
   return { message: genericMessage };
 };
-
-
 
 
 // Verify a password-reset OTP without consuming it.
