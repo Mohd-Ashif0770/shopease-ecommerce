@@ -23,10 +23,11 @@ const startServer = async () => {
     startOtpCleanupJob();
 
     // Import the app dependencies only after Redis is ready.
-    const [{ default: errorhandler }, { default: authRoutes }] =
+    const [{ default: errorhandler }, { default: authRoutes }, { default: categoryRoutes },] =
       await Promise.all([
         import("./middlewares/error.middleware.js"),
         import("./routes/auth.routes.js"),
+        import("./routes/category.routes.js")
       ]);
 
     const app = express();
@@ -52,6 +53,7 @@ const startServer = async () => {
 
     // Routes
     app.use("/api/auth", authRoutes);
+    app.use("/api/categories", categoryRoutes);
 
     // Error handler
     app.use(errorhandler);

@@ -1,7 +1,7 @@
 import express from 'express';
 import { forgotPasswordController, getProfileController, googleAuthController, loginController, logoutController, refreshTokenController, regiterController, resendOtpController, resetPasswordController, verifyOTPController, verifyResetOtpController } from '../controllers/auth.controller.js';
 import validate from '../middlewares/validate.middleware.js';
-import { forgotPasswordSchema, loginSchema, registerSchema, resendOtpSchema, resetPasswordSchema, verifyEmailSchema, verifyResetOtpSchema } from '../validations/auth.schema.js';
+import { forgotPasswordSchema, loginSchema, registerSchema, resendOtpSchema, resetPasswordSchema, verifyEmailSchema, verifyResetOtpSchema } from '../validations/auth.validation.js';
 import protect from '../middlewares/auth.middleware.js';
 import { failedLoginLimiter } from '../middlewares/loginRateLimiter.middleware.js';
 
