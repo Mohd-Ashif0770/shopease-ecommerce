@@ -7,9 +7,16 @@ export const uploadProductImageService = (file) => {
       {
         folder: "shopease/products",
         resource_type: "image",
+        timeout: 120000, // 2 minutes
       },
       (error, result) => {
         if (error) {
+          console.error("Cloudinary upload failed:", {
+            message: error.message,
+            http_code: error.http_code,
+            name: error.name,
+          });
+
           return reject(
             appError(502, "Failed to upload image to Cloudinary")
           );
@@ -27,6 +34,10 @@ export const uploadProductImageService = (file) => {
         });
       }
     );
+
+    stream.on("error", (error) => {
+      console.error("Cloudinary stream error:", error.message);
+    });
 
     stream.end(file.buffer);
   });
