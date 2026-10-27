@@ -3,7 +3,7 @@ import appError from "../utils/appError.js";
 
 export const uploadProductImageService = (file) => {
   return new Promise((resolve, reject) => {
-    const stream = cloudinary.uploader.upload_stream(
+    const uploadStream = cloudinary.uploader.upload_stream(
       {
         folder: "shopease/products",
         resource_type: "image",
@@ -15,6 +15,7 @@ export const uploadProductImageService = (file) => {
             message: error.message,
             http_code: error.http_code,
             name: error.name,
+            fileSize: file.size,
           });
 
           return reject(
@@ -35,11 +36,11 @@ export const uploadProductImageService = (file) => {
       }
     );
 
-    stream.on("error", (error) => {
+    uploadStream.on("error", (error) => {
       console.error("Cloudinary stream error:", error.message);
     });
 
-    stream.end(file.buffer);
+    uploadStream.end(file.buffer);
   });
 };
 
