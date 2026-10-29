@@ -25,3 +25,25 @@ export const createProductSchema = z.object({
     .int()
     .positive("A valid category ID is required"),
 });
+
+const removeImageIdsSchema = z.preprocess((value) => {
+  if (typeof value === "string") {
+    try {
+      return JSON.parse(value);
+    } catch {
+      return value;
+    }
+  }
+
+  return value;
+}, z.array(z.coerce.number().int().positive()).optional());
+
+export const updateProductSchema = z.object({
+  name: z.string().trim().min(2).max(200).optional(),
+  description: z.string().trim().nullable().optional(),
+  price: z.coerce.number().min(0).optional(),
+  stock: z.coerce.number().int().min(0).optional(),
+  category_id: z.coerce.number().int().positive().optional(),
+  is_active: z.enum(["true", "false"]).optional(),
+  remove_image_ids: removeImageIdsSchema,
+});
