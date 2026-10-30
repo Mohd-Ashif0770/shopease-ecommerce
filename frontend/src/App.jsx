@@ -1,6 +1,7 @@
 import { lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { Toaster } from "sonner";
+import Navbar from "./components/Navbar";
 
 
 const Home = lazy(() => import("./pages/Home"));
@@ -18,6 +19,7 @@ const App = () => {
   return (
     <>
       <Suspense fallback={<PageLoader />}>
+       <Navbar/>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/register" element={<Register />} />

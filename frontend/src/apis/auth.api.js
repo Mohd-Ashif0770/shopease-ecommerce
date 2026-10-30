@@ -1,4 +1,3 @@
-import { AwardIcon } from "lucide-react";
 import api from "./axios";
 
 export const registerAPI = async (userData) => {
