@@ -1,11 +1,24 @@
 import api from "./axios";
 
-export const getProductsAPI = async (page, limit, search, category_id, sort) => {
+export const getProductsAPI = async (
+  page,
+  limit,
+  search,
+  category_id,
+  sortBy,
+  order,
+) => {
   const response = await api.get("/products", {
     params: {
-        page, limit, search, category_id, sort
-    }
+      page,
+      limit,
+      search,
+      category_id,
+      sortBy,
+      order,
+    },
   });
+
   return response.data;
 };
 

@@ -1,3 +1,4 @@
+import BestSellingProducts from "../components/Home/BestSellingProducts";
 import HeroSection from "../components/Home/HeroSection";
 
 
@@ -8,6 +9,7 @@ const Home = () => {
       <HeroSection />
 
       {/* Best Selling Products will come next */}
+      <BestSellingProducts />
     </main>
   );
 };

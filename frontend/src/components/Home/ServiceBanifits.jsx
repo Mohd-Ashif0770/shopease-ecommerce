@@ -25,7 +25,7 @@ const benefits = [
 
 const ServiceBanifits = () => {
   return (
-    <div className="grid grid-cols-2 gap-6 border-b bg-gray-50 border-slate-100 px-3 py-7 md:grid-cols-4 md:gap-4 lg:px-10">
+    <div className="grid grid-cols-2 gap-6 rounded-lg overflow-hidden bg-gray-50 border-b border-slate-200 px-6 py-6 sm:px-8 md:grid-cols-4 md:gap-6 lg:px-10">
       {benefits.map((benefit) => {
         const Icon = benefit.icon;
 

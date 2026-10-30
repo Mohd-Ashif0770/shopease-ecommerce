@@ -103,8 +103,9 @@ const HeroSection = () => {
         {/* Hero Content */}
         <div
           key={currentSlide.id + "-content"}
-          className="relative z-10 flex min-h-[440px] animate-[fadeIn_0.7s_ease-in-out] flex-col justify-center px-6 py-12 sm:min-h-[460px] sm:px-10 lg:min-h-[470px] lg:w-[58%] lg:px-14"
+          className="relative z-10 flex min-h-[440px] animate-[fadeIn_0.7s_ease-in-out] flex-col justify-center px-6 py-12 sm:min-h-[460px] sm:px-8 lg:min-h-[470px] lg:w-[58%] lg:px-10"
         >
+           
           {/* Collection Badge */}
           <div
             className="mb-5 inline-flex w-fit items-center gap-2 rounded-full bg-white/75 px-4 py-2 text-xs font-semibold shadow-sm backdrop-blur-sm"

@@ -49,7 +49,7 @@ const Navbar = ({
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-slate-100 bg-white/95 shadow-sm backdrop-blur-md">
-      <div className="mx-auto flex min-h-[72px] max-w-[1440px] items-center justify-between gap-5 px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex min-h-[72px] max-w-[1440px] items-center justify-between gap-5 px-6 sm:px-8 lg:px-10">
 
         {/* Logo */}
         <Link
