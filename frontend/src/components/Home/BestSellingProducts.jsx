@@ -30,7 +30,7 @@ const BestSellingProducts = () => {
 
 
   return (
-    <section className="mx-auto max-w-[1440px] bg-slate-50 px-6 py-12 sm:px-8 lg:px-10">
+    <section className="mx-auto max-w-[1440px] bg-slate-50 px-6 pt-14 sm:px-8 lg:px-10">
       {/* Section Header */}
       <div className="mb-8 flex items-end justify-between gap-4">
         <div>
