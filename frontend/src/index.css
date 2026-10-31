@@ -1,4 +1,6 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
 @import "tailwindcss";
 
 @layer base {
@@ -25,11 +27,41 @@
   }
 }
 
+/* Hero fade animation */
 @keyframes fadeIn {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
 }
+
+/* Infinite brand marquee */
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 35s linear infinite;
+}
+
+.animate-marquee-paused {
+  animation: marquee 35s linear infinite;
+  animation-play-state: paused;
+}
+
+/* @media (prefers-reduced-motion: reduce) {
+  .animate-marquee,
+  .animate-marquee-paused {
+    animation: none;
+  }
+} */
+
