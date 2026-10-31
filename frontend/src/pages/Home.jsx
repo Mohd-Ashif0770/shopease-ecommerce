@@ -1,15 +1,17 @@
 import BestSellingProducts from "../components/Home/BestSellingProducts";
 import HeroSection from "../components/Home/HeroSection";
+import PromotionalBanners from "../components/Home/PromotionalBanners";
+import ShopByCategory from "../components/Home/ShopByCategory";
 
 
 
 const Home = () => {
   return (
-    <main>
+    <main >
       <HeroSection />
-
-      {/* Best Selling Products will come next */}
       <BestSellingProducts />
+      <ShopByCategory/>
+      <PromotionalBanners/>
     </main>
   );
 };
