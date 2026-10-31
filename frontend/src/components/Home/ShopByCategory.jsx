@@ -19,7 +19,7 @@ const ShopByCategory = () => {
   }, [dispatch]);
 
   return (
-    <section className="bg-slate-50 pt-16">
+    <section className="bg-slate-50 pt-18">
       <div className="mx-auto max-w-[1440px] px-6 sm:px-8 lg:px-10">
         <div className="mb-7 flex items-center justify-between">
           <div>

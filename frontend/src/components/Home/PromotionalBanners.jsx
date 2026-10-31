@@ -34,7 +34,7 @@ const promotionalBanners = [
 
 const PromotionalBanners = () => {
   return (
-    <section className="bg-slate-50 py-8 sm:py-10">
+    <section className="bg-slate-50 pt-8 sm:pt-10">
       <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
 
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
