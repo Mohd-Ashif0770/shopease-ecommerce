@@ -152,7 +152,7 @@ const Navbar = ({
               aria-label="Open account menu"
               className="flex items-center gap-2 cursor-pointer"
             >
-              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#087443] text-lg font-semibold text-white">
+              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#087443] text-lg font-semibold text-white">
                 {user?.name?.charAt(0)?.toUpperCase() || "A"}
               </span>
 

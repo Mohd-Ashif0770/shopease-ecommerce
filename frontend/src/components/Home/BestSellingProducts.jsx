@@ -46,7 +46,7 @@ const BestSellingProducts = () => {
 
         <Link
           to="/products"
-          className="hidden shrink-0 items-center gap-2 text-sm font-semibold text-[#087443] transition hover:underline sm:flex"
+          className="hidden border border-slate-300 rounded-lg py-2 px-3 shrink-0 items-center gap-2 text-sm font-semibold text-[#087443] transition-all duration-300 ease-in-out hover:bg-green-700 hover:border-green-700 hover:text-white sm:flex"
         >
           View All
           <ArrowRight size={18} />

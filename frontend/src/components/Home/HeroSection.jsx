@@ -105,7 +105,6 @@ const HeroSection = () => {
           key={currentSlide.id + "-content"}
           className="relative z-10 flex min-h-[440px] animate-[fadeIn_0.7s_ease-in-out] flex-col justify-center px-6 py-12 sm:min-h-[460px] sm:px-8 lg:min-h-[470px] lg:w-[58%] lg:px-10"
         >
-           
           {/* Collection Badge */}
           <div
             className="mb-5 inline-flex w-fit items-center gap-2 rounded-full bg-white/75 px-4 py-2 text-xs font-semibold shadow-sm backdrop-blur-sm"
@@ -132,7 +131,7 @@ const HeroSection = () => {
           <div className="mt-7">
             <Link
               to={currentSlide.link}
-              className="inline-flex items-center gap-3 rounded-full px-7 py-3.5 text-sm font-semibold text-white shadow-lg transition hover:brightness-90"
+              className="group relative isolate inline-flex items-center gap-3 overflow-hidden rounded-full px-7 py-3.5 text-sm font-semibold text-white shadow-lg transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:scale-[1.04] hover:shadow-2xl hover:shadow-black/40 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 before:absolute before:inset-0 before:-z-10 before:origin-left before:scale-x-0 before:rounded-full before:bg-white/20 before:transition-transform before:duration-500 before:ease-out hover:before:scale-x-100 [&>svg]:transition-transform [&>svg]:duration-300 hover:[&>svg]:translate-x-1.5 hover:[&>svg]:scale-110"
               style={{
                 backgroundColor: currentSlide.accent,
               }}
@@ -164,7 +163,6 @@ const HeroSection = () => {
             to={currentSlide.promotionLink}
             aria-label={`Explore ${currentSlide.promotionTitle}`}
             className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-slate-900 transition hover:text-white hover:bg-[#087443]"
-            
           >
             <ArrowRight size={18} />
           </Link>
