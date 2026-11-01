@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -20,7 +19,7 @@ import {
   setError,
   clearAuthError,
 } from "../redux/features/authSlice";
-import LoginRightSection from "../components/LoginRightSection";
+import LoginRightSection from "../components/auth/LoginRightSection";
 
 export default function ResetPassword() {
   const location = useLocation();
@@ -66,8 +65,7 @@ export default function ResetPassword() {
       });
 
       toast.success(
-        response.message ||
-          "Password reset successfully. Please sign in."
+        response.message || "Password reset successfully. Please sign in.",
       );
 
       navigate("/login", { replace: true });
@@ -92,7 +90,7 @@ export default function ResetPassword() {
     <main className="min-h-screen lg:h-screen w-full bg-white grid grid-cols-1 lg:grid-cols-2 overflow-x-hidden">
       <section className="flex flex-col justify-center min-h-screen lg:min-h-0 lg:h-full w-full px-6 py-8 sm:px-12 lg:px-14 xl:px-18 overflow-y-auto">
         <div className="w-full max-w-[420px] mx-auto my-auto">
-         <Link
+          <Link
             to="/login"
             className="mb-5 inline-flex items-center gap-2 text-sm font-medium text-slate-500 transition-colors hover:text-emerald-900 sm:mb-6"
           >
@@ -110,8 +108,8 @@ export default function ResetPassword() {
             </h1>
 
             <p className="mt-3 text-sm leading-6 text-slate-500">
-              Choose a strong password you haven't used before.
-              Your new password must contain at least 8 characters.
+              Choose a strong password you haven't used before. Your new
+              password must contain at least 8 characters.
             </p>
           </div>
 
@@ -137,16 +135,10 @@ export default function ResetPassword() {
                 <button
                   type="button"
                   onClick={() => setShowPassword((previous) => !previous)}
-                  aria-label={
-                    showPassword ? "Hide password" : "Show password"
-                  }
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                   className="absolute right-3 cursor-pointer top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700"
                 >
-                  {showPassword ? (
-                    <EyeOff size={18} />
-                  ) : (
-                    <Eye size={18} />
-                  )}
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
 
@@ -172,9 +164,7 @@ export default function ResetPassword() {
                   autoComplete="new-password"
                   placeholder="Re-enter new password"
                   {...register("confirmPassword")}
-                  className={inputClass(
-                    Boolean(errors.confirmPassword)
-                  )}
+                  className={inputClass(Boolean(errors.confirmPassword))}
                 />
 
                 <button
@@ -204,15 +194,12 @@ export default function ResetPassword() {
               )}
             </div>
 
-
             <button
               type="submit"
               disabled={loading || !email || !otp}
               className="flex h-12 w-full items-center cursor-pointer justify-center gap-2 rounded-xl bg-emerald-800 px-4 text-sm font-semibold text-white transition hover:bg-emerald-900 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {loading && (
-                <LoaderCircle size={17} className="animate-spin" />
-              )}
+              {loading && <LoaderCircle size={17} className="animate-spin" />}
               {loading ? "Updating password..." : "Reset password"}
             </button>
           </form>
@@ -229,7 +216,7 @@ export default function ResetPassword() {
         </div>
       </section>
 
-      <LoginRightSection/>
+      <LoginRightSection />
     </main>
   );
 }

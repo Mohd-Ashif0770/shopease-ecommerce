@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 
-import bannerImage1 from "../../assets/banner-image-1.png";
-import bannerImage2 from "../../assets/banner-image-2.png";
-import bannerImage3 from "../../assets/banner-image-3.png";
+import bannerImage1 from "../../assets/banners/banner-image-1.png";
+import bannerImage2 from "../../assets/banners/banner-image-2.png";
+import bannerImage3 from "../../assets/banners/banner-image-3.png";
 
 import ServiceBanifits from "./ServiceBanifits";
 

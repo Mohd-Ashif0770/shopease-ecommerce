@@ -85,11 +85,11 @@ const ProductCard = ({ product }) => {
         {/* Price */}
         <div className="mt-2 flex flex-wrap items-center gap-3">
           <span className="text-xl font-bold text-green-700">
-            {formatPrice(product.price)}.00
+            {formatPrice(product.price)}
           </span>
 
           <span className="text-slate-500 line-through">
-            {formatPrice(originalPrice)}.00
+            {formatPrice(originalPrice)}
           </span>
         </div>
 

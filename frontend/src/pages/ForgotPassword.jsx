@@ -12,7 +12,7 @@ import { toast } from "sonner";
 
 import { forgotPasswordSchema } from "../validations/auth.validation";
 import { forgotPasswordAPI } from "../apis/auth.api";
-import LoginRightSection from "../components/LoginRightSection";
+import LoginRightSection from "../components/auth/LoginRightSection";
 
 export default function ForgotPassword() {
   const navigate = useNavigate();
@@ -34,11 +34,11 @@ export default function ForgotPassword() {
 
     try {
       const response = await forgotPasswordAPI({ email });
-    //   console.log("Response ---> ", response);
+      //   console.log("Response ---> ", response);
 
       toast.success(
         response.message ||
-          "If an account exists, reset instructions will be sent."
+          "If an account exists, reset instructions will be sent.",
       );
 
       navigate("/verify-reset-otp", {
@@ -145,7 +145,7 @@ export default function ForgotPassword() {
       </section>
 
       {/* RIGHT: Lifestyle panel */}
-      <LoginRightSection/>
+      <LoginRightSection />
     </main>
   );
 }

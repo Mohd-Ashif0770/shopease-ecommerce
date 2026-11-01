@@ -1,7 +1,7 @@
 
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
-import ProductCard from "./ProductCard";
+import ProductCard from "../common/ProductCard";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 import { fetchProducts } from "../../redux/features/productSlice";

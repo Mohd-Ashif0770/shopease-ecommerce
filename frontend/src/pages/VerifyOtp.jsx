@@ -13,7 +13,7 @@ import {
   setError,
   clearAuthError,
 } from "../redux/features/authSlice";
-import RegisterRightSection from "../components/RegisterRightSection";
+import RegisterRightSection from "../components/auth/RegisterRightSection";
 
 const VerifyOtp = () => {
   const dispatch = useDispatch();

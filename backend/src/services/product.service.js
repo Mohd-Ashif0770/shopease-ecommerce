@@ -131,6 +131,8 @@ export const getProductsService = async (query) => {
     limit = "10",
     search = "",
     category_id,
+    minPrice,
+    maxPrice,
     sortBy = "created_at",
     order = "desc",
   } = query;
@@ -152,7 +154,7 @@ export const getProductsService = async (query) => {
     );
   }
 
-  // Whitelist sort columns to prevent SQL injection
+  // Validate sorting
   const allowedSortColumns = {
     name: "p.name",
     price: "p.price",
@@ -171,6 +173,7 @@ export const getProductsService = async (query) => {
     throw appError(400, "order must be asc or desc");
   }
 
+  // Validate category
   if (
     category_id !== undefined &&
     (!/^\d+$/.test(String(category_id)) ||
@@ -178,6 +181,35 @@ export const getProductsService = async (query) => {
       !Number.isSafeInteger(Number(category_id)))
   ) {
     throw appError(400, "category_id must be a positive integer");
+  }
+
+  // Validate price filters
+  const minPriceNumber =
+    minPrice !== undefined ? Number(minPrice) : undefined;
+
+  const maxPriceNumber =
+    maxPrice !== undefined ? Number(maxPrice) : undefined;
+
+  if (
+    minPriceNumber !== undefined &&
+    (!Number.isFinite(minPriceNumber) || minPriceNumber < 0)
+  ) {
+    throw appError(400, "minPrice must be a non-negative number");
+  }
+
+  if (
+    maxPriceNumber !== undefined &&
+    (!Number.isFinite(maxPriceNumber) || maxPriceNumber < 0)
+  ) {
+    throw appError(400, "maxPrice must be a non-negative number");
+  }
+
+  if (
+    minPriceNumber !== undefined &&
+    maxPriceNumber !== undefined &&
+    minPriceNumber > maxPriceNumber
+  ) {
+    throw appError(400, "minPrice cannot be greater than maxPrice");
   }
 
   const offset = (pageNumber - 1) * limitNumber;
@@ -194,6 +226,16 @@ export const getProductsService = async (query) => {
   if (category_id !== undefined) {
     conditions.push("p.category_id = ?");
     params.push(Number(category_id));
+  }
+
+  if (minPriceNumber !== undefined) {
+    conditions.push("p.price >= ?");
+    params.push(minPriceNumber);
+  }
+
+  if (maxPriceNumber !== undefined) {
+    conditions.push("p.price <= ?");
+    params.push(maxPriceNumber);
   }
 
   const whereClause = conditions.join(" AND ");
@@ -236,12 +278,12 @@ export const getProductsService = async (query) => {
         page: pageNumber,
         limit: limitNumber,
         totalPages: Math.ceil(total / limitNumber),
-        totoalProducts: total,
+        totalProducts: total,
       },
     };
   }
 
-  // Fetch all images for the returned products
+  // Fetch all images for returned products
   const productIds = products.map((product) => product.id);
   const placeholders = productIds.map(() => "?").join(", ");
 

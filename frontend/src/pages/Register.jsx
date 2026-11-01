@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -20,10 +19,10 @@ import {
   setLoading,
   setError,
   clearAuthError,
-  setCredentials
+  setCredentials,
 } from "../redux/features/authSlice";
 
-import RegisterRightSection from "../components/RegisterRightSection";
+import RegisterRightSection from "../components/auth/RegisterRightSection";
 import { useEffect } from "react";
 import { useRef } from "react";
 import { GoogleLogin } from "@react-oauth/google";
@@ -36,8 +35,8 @@ const Register = () => {
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-    const googleBtnWrapRef = useRef(null);
-    const [googleButtonWidth, setGoogleButtonWidth] = useState(null);
+  const googleBtnWrapRef = useRef(null);
+  const [googleButtonWidth, setGoogleButtonWidth] = useState(null);
 
   const {
     register,
@@ -81,54 +80,54 @@ const Register = () => {
     }
   };
 
-   const handleGoogleSuccess = async (googleResponse) => {
-      if (!googleResponse.credential) {
-        toast.error("Google sign-in did not return a credential.");
-        return;
-      }
-  
-      try {
-        dispatch(setLoading(true));
-        dispatch(clearAuthError());
-  
-        const response = await googleAuthAPI({
-          credential: googleResponse.credential,
-          rememberMe: getValues("rememberMe") ?? false,
-        });
-  
-        const { user, accessToken } = response.data;
-  
-        dispatch(setCredentials({ user, accessToken }));
-  
-        toast.success("Signed in with Google successfully.");
-        navigate("/");
-      } catch (error) {
-        const message =
-          error.response?.data?.message ||
-          "Google sign-in failed. Please try again.";
-  
-        dispatch(setError(message));
-        toast.error(message);
-      } finally {
-        dispatch(setLoading(false));
-      }
+  const handleGoogleSuccess = async (googleResponse) => {
+    if (!googleResponse.credential) {
+      toast.error("Google sign-in did not return a credential.");
+      return;
+    }
+
+    try {
+      dispatch(setLoading(true));
+      dispatch(clearAuthError());
+
+      const response = await googleAuthAPI({
+        credential: googleResponse.credential,
+        rememberMe: getValues("rememberMe") ?? false,
+      });
+
+      const { user, accessToken } = response.data;
+
+      dispatch(setCredentials({ user, accessToken }));
+
+      toast.success("Signed in with Google successfully.");
+      navigate("/");
+    } catch (error) {
+      const message =
+        error.response?.data?.message ||
+        "Google sign-in failed. Please try again.";
+
+      dispatch(setError(message));
+      toast.error(message);
+    } finally {
+      dispatch(setLoading(false));
+    }
+  };
+
+  useEffect(() => {
+    const el = googleBtnWrapRef.current;
+    if (!el) return;
+
+    const updateWidth = () => {
+      const width = Math.floor(el.getBoundingClientRect().width);
+      setGoogleButtonWidth(Math.min(Math.max(width, 200), 400));
     };
-  
-    useEffect(() => {
-      const el = googleBtnWrapRef.current;
-      if (!el) return;
-  
-      const updateWidth = () => {
-        const width = Math.floor(el.getBoundingClientRect().width);
-        setGoogleButtonWidth(Math.min(Math.max(width, 200), 400));
-      };
-  
-      updateWidth();
-      const observer = new ResizeObserver(updateWidth);
-      observer.observe(el);
-  
-      return () => observer.disconnect();
-    }, []);
+
+    updateWidth();
+    const observer = new ResizeObserver(updateWidth);
+    observer.observe(el);
+
+    return () => observer.disconnect();
+  }, []);
 
   const inputClass = `
     h-[40px] w-full rounded-lg border border-slate-300
@@ -141,8 +140,7 @@ const Register = () => {
   const fieldLabel =
     "mb-1.5 block text-xs font-semibold text-slate-900 sm:text-sm";
 
-  const iconClass =
-    "absolute left-3 top-1/2 -translate-y-1/2 text-slate-400";
+  const iconClass = "absolute left-3 top-1/2 -translate-y-1/2 text-slate-400";
 
   return (
     <main className="min-h-screen w-full bg-white lg:grid lg:h-screen lg:min-h-0 lg:grid-cols-2 lg:overflow-hidden">
@@ -249,11 +247,7 @@ const Register = () => {
                   aria-label={showPassword ? "Hide password" : "Show password"}
                   className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-slate-400 hover:text-emerald-800"
                 >
-                  {showPassword ? (
-                    <EyeOff size={17} />
-                  ) : (
-                    <Eye size={17} />
-                  )}
+                  {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
                 </button>
               </div>
 
@@ -335,7 +329,7 @@ const Register = () => {
           </div>
 
           {/* Google sign-up placeholder */}
-         <div ref={googleBtnWrapRef} className="flex w-full justify-center">
+          <div ref={googleBtnWrapRef} className="flex w-full justify-center">
             <GoogleLogin
               onSuccess={handleGoogleSuccess}
               onError={() => toast.error("Google sign-in was unsuccessful.")}
@@ -362,8 +356,7 @@ const Register = () => {
       </section>
 
       {/* RIGHT section */}
-      <RegisterRightSection/>
-      
+      <RegisterRightSection />
     </main>
   );
 };

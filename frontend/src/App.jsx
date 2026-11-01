@@ -1,9 +1,9 @@
 import { lazy, Suspense } from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import { Toaster } from "sonner";
-import Navbar from "./components/Navbar";
-import Footer from "./components/Footer";
-
+import Navbar from "./components/common/Navbar";
+import Footer from "./components/common/Footer";
+import ScrollToTop from "./components/common/ScrollToTop";
 
 const Home = lazy(() => import("./pages/Home"));
 const Register = lazy(() => import("./pages/Register"));
@@ -12,15 +12,16 @@ const Login = lazy(() => import("./pages/Login"));
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const VerifyResetOtp = lazy(() => import("./pages/VerifyResetOtp"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
-const PageLoader = lazy(() => import("./components/PageLoader"));
-
-
+const PageLoader = lazy(() => import("./components/common/PageLoader"));
+const Products = lazy(() => import("./pages/Products"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 const App = () => {
   return (
     <>
       <Suspense fallback={<PageLoader />}>
-       <Navbar/>
+        <Navbar />
+        <ScrollToTop/>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/register" element={<Register />} />
@@ -29,9 +30,10 @@ const App = () => {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/verify-reset-otp" element={<VerifyResetOtp />} />
           <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="*" element={<Navigate to="/login" replace />} />
+          <Route path="/products" element={<Products />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
-        <Footer/>
+        <Footer />
       </Suspense>
       <Toaster position="top-right" richColors />
     </>

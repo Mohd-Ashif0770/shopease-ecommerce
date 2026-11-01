@@ -14,7 +14,7 @@ import {
   setError,
   clearAuthError,
 } from "../redux/features/authSlice";
-import LoginRightSection from "../components/LoginRightSection";
+import LoginRightSection from "../components/auth/LoginRightSection";
 import { useEffect } from "react";
 import { useRef } from "react";
 

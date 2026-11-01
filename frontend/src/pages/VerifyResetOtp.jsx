@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -7,19 +6,14 @@ import { useDispatch, useSelector } from "react-redux";
 import { ArrowLeft, KeyRound, LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
 
-import {
-  verifyResetOtpSchema,
-} from "../validations/auth.validation";
-import {
-  verifyResetOtpAPI,
-  forgotPasswordAPI,
-} from "../apis/auth.api";
+import { verifyResetOtpSchema } from "../validations/auth.validation";
+import { verifyResetOtpAPI, forgotPasswordAPI } from "../apis/auth.api";
 import {
   setLoading,
   setError,
   clearAuthError,
 } from "../redux/features/authSlice";
-import LoginRightSection from "../components/LoginRightSection";
+import LoginRightSection from "../components/auth/LoginRightSection";
 
 export default function VerifyResetOtp() {
   const location = useLocation();
@@ -69,9 +63,7 @@ export default function VerifyResetOtp() {
         otp,
       });
 
-      toast.success(
-        response.message || "Verification code accepted."
-      );
+      toast.success(response.message || "Verification code accepted.");
 
       navigate("/reset-password", {
         state: { email, otp },
@@ -99,7 +91,7 @@ export default function VerifyResetOtp() {
 
       toast.success(
         response.message ||
-          "If an account exists, reset instructions will be sent."
+          "If an account exists, reset instructions will be sent.",
       );
 
       setValue("otp", "");
@@ -133,12 +125,12 @@ export default function VerifyResetOtp() {
               <KeyRound size={23} strokeWidth={1.8} />
             </div>
 
-           <h1 className="font-heading text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl sm:leading-tight">
+            <h1 className="font-heading text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl sm:leading-tight">
               Check Your Email
             </h1>
 
             <p className="mt-3 text-sm leading-6 text-slate-500">
-              Enter the 6-digit password reset code sent to{" "} <br/>
+              Enter the 6-digit password reset code sent to <br />
               <span className="font-medium text-slate-800 break-all">
                 {email || "your email"}
               </span>
@@ -191,9 +183,7 @@ export default function VerifyResetOtp() {
               disabled={loading || !email}
               className="flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-emerald-800 px-4 text-sm font-semibold text-white transition hover:bg-emerald-900 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {loading && (
-                <LoaderCircle size={17} className="animate-spin" />
-              )}
+              {loading && <LoaderCircle size={17} className="animate-spin" />}
               {loading ? "Verifying..." : "Verify code"}
             </button>
           </form>
@@ -226,8 +216,8 @@ export default function VerifyResetOtp() {
         </div>
       </section>
 
-     {/* right section */}
-     <LoginRightSection/>
+      {/* right section */}
+      <LoginRightSection />
     </main>
   );
 }

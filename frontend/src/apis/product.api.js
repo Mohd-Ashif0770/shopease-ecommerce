@@ -5,6 +5,8 @@ export const getProductsAPI = async (
   limit,
   search,
   category_id,
+  minPrice,
+  maxPrice,
   sortBy,
   order,
 ) => {
@@ -14,6 +16,8 @@ export const getProductsAPI = async (
       limit,
       search,
       category_id,
+      minPrice,
+      maxPrice,
       sortBy,
       order,
     },

@@ -27,51 +27,54 @@ const productSlice = createSlice({
   },
 });
 
-export const {
-  setProducts,
-  setProductLoading,
-  setProductError,
-} = productSlice.actions;
+export const { setProducts, setProductLoading, setProductError } =
+  productSlice.actions;
 
 // Async action creator (without createAsyncThunk)
-export const fetchProducts = (params = {}) => async (dispatch) => {
-  try {
-    dispatch(setProductLoading(true));
-    dispatch(setProductError(null));
+export const fetchProducts =
+  (params = {}) =>
+  async (dispatch) => {
+    try {
+      dispatch(setProductLoading(true));
+      dispatch(setProductError(null));
 
-    const {
-      page = 1,
-      limit = 10,
-      search = "",
-      category_id,
-      sortBy = "created_at",
-      order = "desc",
-    } = params;
+      const {
+        page = 1,
+        limit = 8,
+        search = "",
+        category_id,
+        minPrice,
+        maxPrice,
+        sortBy = "created_at",
+        order = "desc",
+      } = params;
 
-    const response = await getProductsAPI(
-      page,
-      limit,
-      search,
-      category_id,
-      sortBy,
-      order
-    );
+      const response = await getProductsAPI(
+        page,
+        limit,
+        search,
+        category_id,
+        minPrice,
+        maxPrice,
+        sortBy,
+        order,
+      );
 
-    dispatch(
-      setProducts({
-        products: response.data.products,
-        pagination: response.data.pagination,
-      })
-    );
-  } catch (error) {
-    dispatch(
-      setProductError(
-        error.response?.data?.message || "Failed to fetch products"
-      )
-    );
-  } finally {
-    dispatch(setProductLoading(false));
-  }
-};
+      dispatch(
+        setProducts({
+          products: response.data.products,
+          pagination: response.data.pagination,
+        }),
+      );
+    } catch (error) {
+      dispatch(
+        setProductError(
+          error.response?.data?.message || "Failed to fetch products",
+        ),
+      );
+    } finally {
+      dispatch(setProductLoading(false));
+    }
+  };
 
 export default productSlice.reducer;

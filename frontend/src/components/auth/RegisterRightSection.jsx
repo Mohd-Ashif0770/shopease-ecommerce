@@ -1,4 +1,4 @@
-import interiorImage from "../assets/login-interior.png";
+import interiorImage from "../../assets/login-interior.png";
 import { Truck, ShieldCheck, PackageCheck } from "lucide-react";
 
 const RegisterRightSection = () => {
