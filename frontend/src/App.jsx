@@ -2,6 +2,7 @@ import { lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { Toaster } from "sonner";
 import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
 
 
 const Home = lazy(() => import("./pages/Home"));
@@ -30,6 +31,7 @@ const App = () => {
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
+        <Footer/>
       </Suspense>
       <Toaster position="top-right" richColors />
     </>
