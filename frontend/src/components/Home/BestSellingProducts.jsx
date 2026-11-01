@@ -45,12 +45,16 @@ const BestSellingProducts = () => {
         </div>
 
         <Link
-          to="/products"
-          className="hidden border border-slate-300 rounded-lg py-2 px-3 shrink-0 items-center gap-2 text-sm font-semibold text-[#087443] transition-all duration-300 ease-in-out hover:bg-green-700 hover:border-green-700 hover:text-white sm:flex"
-        >
-          View All
-          <ArrowRight size={18} />
-        </Link>
+            to="/blogs"
+            className="group inline-flex shrink-0 items-center gap-2 rounded-full border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 transition-all duration-300 hover:border-emerald-600 hover:bg-emerald-50 hover:text-emerald-700"
+          >
+            
+            <span>View All</span>
+            <ArrowRight
+              size={16}
+              className="transition-transform duration-300 group-hover:translate-x-1"
+            />
+          </Link>
       </div>
 
       {/* Loading */}

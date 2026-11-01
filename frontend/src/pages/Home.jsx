@@ -1,4 +1,5 @@
 import BestSellingProducts from "../components/Home/BestSellingProducts";
+import BlogSection from "../components/Home/BlogSection";
 import HeroSection from "../components/Home/HeroSection";
 import PromotionalBanners from "../components/Home/PromotionalBanners";
 import ShopByCategory from "../components/Home/ShopByCategory";
@@ -16,6 +17,7 @@ const Home = () => {
       <PromotionalBanners/>
       <Testimonials/>
       <TrustedBrands/>
+      <BlogSection/>
     </main>
   );
 };
