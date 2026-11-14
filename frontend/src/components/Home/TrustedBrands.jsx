@@ -1,5 +1,5 @@
-
 import { useState } from "react";
+import { motion } from "motion/react";
 
 import appleLogo from "../../assets/brands/apple.png";
 import samsungLogo from "../../assets/brands/samsung.png";
@@ -26,22 +26,22 @@ const TrustedBrands = () => {
   const marqueeBrands = [...brands, ...brands];
 
   return (
-    <section className="overflow-hidden pt-14 sm:pt-18">
+    <section className="overflow-hidden py-8 sm:py-12 lg:py-14">
       <div className="mx-auto max-w-[1440px] px-6 sm:px-8 lg:px-10">
         {/* Section Heading */}
         <div className="mb-8">
-          <h2 className="text-2xl font-bold tracking-tight text-slate-900">
+          <h2 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
             Trusted By Top Brands
           </h2>
 
           <p className="mt-1 text-sm text-slate-500 sm:text-base">
-            Discover products from some of the world's most recognized brands.
+            Discover authentic products from the world's leading manufacturers
           </p>
         </div>
 
-        {/* Brand Marquee */}
+        {/* Brand Marquee Container */}
         <div
-          className="relative overflow-hidden"
+          className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white/60 py-6 shadow-xs backdrop-blur-xs"
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
           onFocus={() => setIsPaused(true)}
@@ -51,24 +51,29 @@ const TrustedBrands = () => {
             }
           }}
         >
+          {/* Gradient fade edges */}
+          <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-white/90 to-transparent sm:w-24" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-white/90 to-transparent sm:w-24" />
+
           <div
             className={`flex w-max items-center gap-12 sm:gap-16 lg:gap-20 ${
               isPaused ? "animate-marquee-paused" : "animate-marquee"
             }`}
           >
             {marqueeBrands.map((brand, index) => (
-              <div
+              <motion.div
                 key={`${brand.name}-${index}`}
+                whileHover={{ scale: 1.1 }}
                 aria-hidden={index >= brands.length}
-                className="flex h-16 w-28 shrink-0 items-center justify-center sm:w-36"
+                className="flex h-14 w-28 shrink-0 items-center justify-center sm:w-36"
               >
                 <img
                   src={brand.logo}
                   alt={index < brands.length ? `${brand.name} logo` : ""}
                   loading="lazy"
-                  className="max-h-12 max-w-24 object-contain opacity-60 grayscale transition-all duration-300 hover:scale-110 hover:opacity-100 hover:grayscale-0 sm:max-h-16 sm:max-w-28"
+                  className="max-h-11 max-w-24 object-contain opacity-60 grayscale transition-all duration-300 hover:opacity-100 hover:grayscale-0 sm:max-h-14 sm:max-w-28"
                 />
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>

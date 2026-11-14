@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { motion, AnimatePresence } from "motion/react";
 import { ArrowRight, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 
 import bannerImage1 from "../../assets/banners/banner-image-1.png";
@@ -61,6 +62,7 @@ const slides = [
 
 const HeroSection = () => {
   const [activeSlide, setActiveSlide] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
 
   const currentSlide = slides[activeSlide];
 
@@ -72,101 +74,155 @@ const HeroSection = () => {
     setActiveSlide((prev) => (prev - 1 + slides.length) % slides.length);
   };
 
-  // Automatic slide change
+  // Automatic slide change with pause on hover
   useEffect(() => {
+    if (isPaused) return;
     const interval = setInterval(() => {
       setActiveSlide((prev) => (prev + 1) % slides.length);
     }, 5000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [isPaused]);
 
   return (
-    <section className="mx-auto max-w-[1440px]">
+    <section className="mx-auto max-w-[1440px] pb-4 sm:pb-6">
       {/* Main Hero Carousel */}
-      <div className="relative isolate min-h-[440px] overflow-hidden bg-[#f4f8f5] sm:min-h-[460px] lg:min-h-[470px]">
-        {/* Background Image */}
-        <div className="absolute inset-0 -z-10">
-          <img
+      <div
+        className="relative isolate min-h-[440px] overflow-hidden bg-[#f4f8f5] sm:min-h-[460px] lg:min-h-[470px]"
+        onMouseEnter={() => setIsPaused(true)}
+        onMouseLeave={() => setIsPaused(false)}
+      >
+        {/* Background Image with AnimatePresence */}
+        <AnimatePresence mode="wait">
+          <motion.div
             key={currentSlide.id}
-            src={currentSlide.image}
-            alt={currentSlide.badge}
-            className="h-full w-full animate-[fadeIn_0.7s_ease-in-out] object-cover object-center"
-          />
-        </div>
+            initial={{ opacity: 0, scale: 1.04 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            className="absolute inset-0 -z-10"
+          >
+            <img
+              src={currentSlide.image}
+              alt={currentSlide.badge}
+              className="h-full w-full object-cover object-center"
+            />
+          </motion.div>
+        </AnimatePresence>
 
         {/* Dynamic Gradient Overlay */}
         <div
           className={`absolute inset-y-0 left-0 z-0 w-full bg-gradient-to-r ${currentSlide.overlay} md:w-[68%]`}
         />
 
-        {/* Hero Content */}
-        <div
-          key={currentSlide.id + "-content"}
-          className="relative z-10 flex min-h-[440px] animate-[fadeIn_0.7s_ease-in-out] flex-col justify-center px-6 py-12 sm:min-h-[460px] sm:px-8 lg:min-h-[470px] lg:w-[58%] lg:px-10"
-        >
-          {/* Collection Badge */}
-          <div
-            className="mb-5 inline-flex w-fit items-center gap-2 rounded-full bg-white/75 px-4 py-2 text-xs font-semibold shadow-sm backdrop-blur-sm"
-            style={{ color: currentSlide.accent }}
+        {/* Hero Content with Motion */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentSlide.id + "-content"}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            className="relative z-10 flex min-h-[440px] flex-col justify-center px-6 py-12 sm:min-h-[460px] sm:px-8 lg:min-h-[470px] lg:w-[58%] lg:px-10"
           >
-            <Sparkles size={15} strokeWidth={2} />
-            {currentSlide.badge}
-          </div>
-
-          {/* Heading */}
-          <h1 className="max-w-xl text-4xl font-extrabold leading-[1.12] tracking-tight text-slate-950 sm:text-5xl lg:text-[56px]">
-            {currentSlide.title}
-            <span className="block" style={{ color: currentSlide.accent }}>
-              {currentSlide.highlight}
-            </span>
-          </h1>
-
-          {/* Description */}
-          <p className="mt-5 max-w-md text-sm leading-6 text-slate-600 sm:text-base">
-            {currentSlide.description}
-          </p>
-
-          {/* CTA Button */}
-          <div className="mt-7">
-            <Link
-              to={currentSlide.link}
-              className="group relative isolate inline-flex items-center gap-3 overflow-hidden rounded-full px-7 py-3.5 text-sm font-semibold text-white shadow-lg transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:scale-[1.04] hover:shadow-2xl hover:shadow-black/40 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 before:absolute before:inset-0 before:-z-10 before:origin-left before:scale-x-0 before:rounded-full before:bg-white/20 before:transition-transform before:duration-500 before:ease-out hover:before:scale-x-100 [&>svg]:transition-transform [&>svg]:duration-300 hover:[&>svg]:translate-x-1.5 hover:[&>svg]:scale-110"
-              style={{
-                backgroundColor: currentSlide.accent,
-              }}
-            >
-              {currentSlide.buttonText}
-              <ArrowRight size={18} />
-            </Link>
-          </div>
-        </div>
-
-        {/* Floating Promotion Card */}
-        <div
-          key={currentSlide.id + "-promotion"}
-          className="absolute bottom-6 right-6 z-20 hidden animate-[fadeIn_0.7s_ease-in-out] items-center gap-5 rounded-2xl border border-white/70 bg-white/95 px-5 py-2 shadow-xl backdrop-blur-sm sm:flex lg:bottom-10 lg:right-10"
-        >
-          <div>
-            <h3 className="text-sm font-semibold text-slate-900">
-              {currentSlide.promotionTitle}
-            </h3>
-            <p
-              className="mt-1 text-xs font-semibold"
+            {/* Collection Badge */}
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.1 }}
+              className="mb-5 inline-flex w-fit items-center gap-2 rounded-full bg-white/80 px-4 py-2 text-xs font-semibold shadow-xs backdrop-blur-md"
               style={{ color: currentSlide.accent }}
             >
-              {currentSlide.promotionDiscount}
-            </p>
-          </div>
+              <Sparkles size={15} strokeWidth={2} />
+              {currentSlide.badge}
+            </motion.div>
 
-          <Link
-            to={currentSlide.promotionLink}
-            aria-label={`Explore ${currentSlide.promotionTitle}`}
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-slate-900 transition hover:text-white hover:bg-[#087443]"
+            {/* Heading */}
+            <motion.h1
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.15 }}
+              className="max-w-xl text-4xl font-extrabold leading-[1.12] tracking-tight text-slate-950 sm:text-5xl lg:text-[56px]"
+            >
+              {currentSlide.title}
+              <span className="block" style={{ color: currentSlide.accent }}>
+                {currentSlide.highlight}
+              </span>
+            </motion.h1>
+
+            {/* Description */}
+            <motion.p
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="mt-5 max-w-md text-sm leading-6 text-slate-600 sm:text-base"
+            >
+              {currentSlide.description}
+            </motion.p>
+
+            {/* CTA Button */}
+            <motion.div
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.25 }}
+              className="mt-7"
+            >
+              <motion.div
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                className="inline-block"
+              >
+                <Link
+                  to={currentSlide.link}
+                  className="group relative isolate inline-flex items-center gap-3 overflow-hidden rounded-full px-7 py-3.5 text-sm font-semibold text-white shadow-lg transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2"
+                  style={{
+                    backgroundColor: currentSlide.accent,
+                  }}
+                >
+                  {currentSlide.buttonText}
+                  <ArrowRight
+                    size={18}
+                    className="transition-transform duration-300 group-hover:translate-x-1.5"
+                  />
+                </Link>
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        </AnimatePresence>
+
+        {/* Floating Promotion Card */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentSlide.id + "-promotion"}
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="absolute bottom-6 right-6 z-20 hidden items-center gap-5 rounded-2xl border border-white/70 bg-white/95 px-5 py-2.5 shadow-xl backdrop-blur-md sm:flex lg:bottom-10 lg:right-10"
           >
-            <ArrowRight size={18} />
-          </Link>
-        </div>
+            <div>
+              <h3 className="text-sm font-semibold text-slate-900">
+                {currentSlide.promotionTitle}
+              </h3>
+              <p
+                className="mt-0.5 text-xs font-semibold"
+                style={{ color: currentSlide.accent }}
+              >
+                {currentSlide.promotionDiscount}
+              </p>
+            </div>
+
+            <motion.div whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.92 }}>
+              <Link
+                to={currentSlide.promotionLink}
+                aria-label={`Explore ${currentSlide.promotionTitle}`}
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-slate-900 transition hover:bg-[#087443] hover:text-white"
+              >
+                <ArrowRight size={18} />
+              </Link>
+            </motion.div>
+          </motion.div>
+        </AnimatePresence>
 
         {/* Slide Indicators - Center Bottom */}
         <div className="absolute bottom-5 left-1/2 z-30 flex -translate-x-1/2 items-center gap-2">
@@ -176,8 +232,8 @@ const HeroSection = () => {
               onClick={() => setActiveSlide(index)}
               aria-label={`Go to slide ${index + 1}`}
               aria-current={activeSlide === index ? "true" : undefined}
-              className={`h-2 rounded-full transition-all duration-300 ${
-                activeSlide === index ? "w-8" : "w-2 bg-slate-400/60"
+              className={`relative h-2.5 cursor-pointer rounded-full transition-all duration-300 ${
+                activeSlide === index ? "w-8" : "w-2.5 bg-slate-400/50 hover:bg-slate-400"
               }`}
               style={
                 activeSlide === index
@@ -189,26 +245,32 @@ const HeroSection = () => {
         </div>
 
         {/* Previous Button */}
-        <button
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
           onClick={previousSlide}
           aria-label="Previous slide"
-          className="absolute left-3 top-1/2 z-30 flex cursor-pointer h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full border border-white/50 bg-white/20 text-slate-700 shadow-md transition hover:scale-105 hover:bg-white sm:left-4 sm:h-9 sm:w-9"
+          className="absolute left-3 top-1/2 z-30 flex h-9 w-9 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-white/60 bg-white/70 text-slate-700 shadow-md backdrop-blur-sm transition hover:bg-white sm:left-5 sm:h-10 sm:w-10"
         >
-          <ChevronLeft size={18} />
-        </button>
+          <ChevronLeft size={20} />
+        </motion.button>
 
         {/* Next Button */}
-        <button
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
           onClick={nextSlide}
           aria-label="Next slide"
-          className="absolute right-3 top-1/2 z-30 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full border cursor-pointer border-white/70 bg-white/90 text-slate-700 shadow-md transition hover:scale-105 hover:bg-white sm:right-4 sm:h-9 sm:w-9"
+          className="absolute right-3 top-1/2 z-30 flex h-9 w-9 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-white/60 bg-white/70 text-slate-700 shadow-md backdrop-blur-sm transition hover:bg-white sm:right-5 sm:h-10 sm:w-10"
         >
-          <ChevronRight size={18} />
-        </button>
+          <ChevronRight size={20} />
+        </motion.button>
       </div>
 
       {/* Service Benefits */}
-      <ServiceBanifits />
+      <div className="mt-4 px-4 sm:px-6 lg:px-8">
+        <ServiceBanifits />
+      </div>
     </section>
   );
 };

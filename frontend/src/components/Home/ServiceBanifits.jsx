@@ -1,4 +1,6 @@
+import { motion } from "motion/react";
 import { Truck, ShieldCheck, PackageCheck, Headset } from "lucide-react";
+import { staggerContainer, staggerItem } from "../../utils/motion";
 
 const benefits = [
   {
@@ -25,33 +27,39 @@ const benefits = [
 
 const ServiceBanifits = () => {
   return (
-    <div className="grid grid-cols-2 gap-6 rounded-lg overflow-hidden bg-gray-50 border-b border-slate-200 px-6 py-6 sm:px-8 md:grid-cols-4 md:gap-6 lg:px-10">
+    <motion.div
+      variants={staggerContainer(0.1, 0.1)}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.2 }}
+      className="grid grid-cols-2 gap-4 rounded-2xl bg-white/80 p-5 shadow-sm border border-slate-200/80 backdrop-blur-sm sm:px-8 md:grid-cols-4 md:gap-6 lg:px-10"
+    >
       {benefits.map((benefit) => {
         const Icon = benefit.icon;
 
         return (
-          <div
+          <motion.div
             key={benefit.title}
-            className="flex items-center justify-center gap-3"
+            variants={staggerItem}
+            whileHover={{ y: -2 }}
+            className="flex items-center justify-center gap-3.5 rounded-xl p-2 transition-colors duration-200 hover:bg-slate-50/80"
           >
-            <Icon
-              size={27}
-              strokeWidth={1.7}
-              className="shrink-0 text-[#087443]"
-            />
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-[#087443] shadow-xs">
+              <Icon size={22} strokeWidth={1.8} />
+            </div>
 
             <div>
               <h3 className="text-xs font-bold text-slate-900 sm:text-sm">
                 {benefit.title}
               </h3>
-              <p className="mt-1 text-[11px] text-slate-500 sm:text-xs">
+              <p className="mt-0.5 text-[11px] text-slate-500 sm:text-xs">
                 {benefit.description}
               </p>
             </div>
-          </div>
+          </motion.div>
         );
       })}
-    </div>
+    </motion.div>
   );
 };
 

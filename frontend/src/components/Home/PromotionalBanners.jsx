@@ -1,9 +1,10 @@
-
 import { Link } from "react-router-dom";
+import { motion } from "motion/react";
 import { ArrowRight } from "lucide-react";
 
 import furnitureBanner from "../../assets/categories/furniture-banner.png";
 import electronicsBanner from "../../assets/categories/electronics-banner.png";
+import { staggerContainer, staggerItem } from "../../utils/motion";
 
 const promotionalBanners = [
   {
@@ -11,64 +12,71 @@ const promotionalBanners = [
     badge: "Smart Living",
     title: "Modern Furniture",
     highlight: "For a Better Home",
-    description: "Stylish, comfortable and built for your lifestyle.",
+    description: "Stylish, comfortable and built for your everyday lifestyle.",
     buttonText: "Shop Now",
     image: furnitureBanner,
     link: "/products?category=furniture",
     theme: "bg-[#EAF4EB]",
-    badgeStyle: "bg-[#D5EBDD] text-green-800",
+    badgeStyle: "bg-emerald-100/80 text-emerald-900 border border-emerald-200",
   },
   {
     id: 2,
     badge: "Up to 30% Off",
     title: "Latest Electronics",
-    highlight: "Deals",
-    description: "Top technology for work, entertainment and everyday life.",
+    highlight: "Super Deals",
+    description: "Top technology for work, entertainment and smart living.",
     buttonText: "Shop Now",
     image: electronicsBanner,
-    link: "/products?category=mobiles-and-laptops",
+    link: "/products?category=electronics",
     theme: "bg-[#FFF0E3]",
-    badgeStyle: "bg-[#FFE2D3] text-orange-600",
+    badgeStyle: "bg-amber-100/80 text-amber-900 border border-amber-200",
   },
 ];
 
 const PromotionalBanners = () => {
   return (
-    <section className="bg-slate-50 pt-8 sm:pt-10">
-      <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
-
-        <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-
+    <section className="py-8 sm:py-12 lg:py-14">
+      <div className="mx-auto max-w-[1440px] px-6 sm:px-8 lg:px-10">
+        <motion.div
+          variants={staggerContainer(0.12, 0.05)}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.15 }}
+          className="grid grid-cols-1 gap-6 lg:grid-cols-2"
+        >
           {promotionalBanners.map((banner) => (
-            <div
+            <motion.div
               key={banner.id}
-              className={`group relative isolate min-h-[230px] overflow-hidden rounded-2xl ${banner.theme} sm:min-h-[250px]`}
+              variants={staggerItem}
+              whileHover={{ y: -4 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+              className={`group relative isolate min-h-[240px] overflow-hidden rounded-3xl border border-slate-200/70 ${banner.theme} shadow-xs transition-shadow duration-300 hover:shadow-xl sm:min-h-[260px]`}
             >
               {/* Background Image */}
               <img
                 src={banner.image}
                 alt={banner.title}
-                className="absolute inset-0 -z-20 h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-[1.03]"
+                className="absolute inset-0 -z-20 h-full w-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
+                loading="lazy"
               />
 
               {/* Text Readability Overlay */}
-              <div className="absolute inset-0 -z-10 bg-gradient-to-r from-white/25 via-transparent to-transparent" />
+              <div className="absolute inset-0 -z-10 bg-gradient-to-r from-white/35 via-white/10 to-transparent" />
 
               {/* Content */}
-              <div className="relative z-10 flex min-h-[230px] w-[58%] flex-col items-start justify-center p-5 sm:min-h-[250px] sm:w-[55%] sm:p-7">
-
+              <div className="relative z-10 flex min-h-[240px] w-[62%] flex-col items-start justify-center p-6 sm:min-h-[260px] sm:w-[55%] sm:p-8">
                 {/* Badge */}
                 <span
-                  className={`mb-3 inline-flex rounded-full px-3 py-1 text-[11px] font-semibold ${banner.badgeStyle}`}
+                  className={`mb-3 inline-flex rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-wider backdrop-blur-xs ${banner.badgeStyle}`}
                 >
                   {banner.badge}
                 </span>
 
                 {/* Heading */}
-                <h3 className="text-xl font-bold leading-tight tracking-tight text-slate-900 sm:text-2xl">
+                <h3 className="text-xl font-extrabold leading-tight tracking-tight text-slate-900 sm:text-2xl lg:text-3xl">
                   {banner.title}
                   <br />
-                  {banner.highlight}
+                  <span className="text-[#087443]">{banner.highlight}</span>
                 </h3>
 
                 {/* Description */}
@@ -77,19 +85,23 @@ const PromotionalBanners = () => {
                 </p>
 
                 {/* CTA */}
-                <Link
-                  to={banner.link}
-                  className="mt-4 inline-flex items-center gap-2 rounded-full bg-green-700 px-5 py-2.5 text-xs font-semibold text-white transition-all duration-300 hover:bg-green-800 hover:shadow-md sm:px-6 sm:py-3 sm:text-sm"
+                <motion.div
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.96 }}
+                  className="mt-5"
                 >
-                  {banner.buttonText}
-                  <ArrowRight size={16} />
-                </Link>
-
+                  <Link
+                    to={banner.link}
+                    className="inline-flex items-center gap-2 rounded-full bg-[#087443] px-5 py-2.5 text-xs font-semibold text-white shadow-sm transition-all duration-300 hover:bg-emerald-800 sm:px-6 sm:py-3 sm:text-sm"
+                  >
+                    {banner.buttonText}
+                    <ArrowRight size={16} />
+                  </Link>
+                </motion.div>
               </div>
-            </div>
+            </motion.div>
           ))}
-
-        </div>
+        </motion.div>
       </div>
     </section>
   );
