@@ -60,6 +60,55 @@ const slides = [
   },
 ];
 
+const CharByCharText = ({ text, delay = 0, className = "", style = {} }) => {
+  const words = text.split(" ");
+
+  const containerVariants = {
+    hidden: { opacity: 1 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.03,
+        delayChildren: delay,
+      },
+    },
+  };
+
+  const charVariants = {
+    hidden: { opacity: 0, y: 10, filter: "blur(3px)" },
+    visible: {
+      opacity: 1,
+      y: 0,
+      filter: "blur(0px)",
+      transition: {
+        duration: 0.22,
+        ease: [0.22, 1, 0.36, 1],
+      },
+    },
+  };
+
+  return (
+    <motion.span
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className={`inline-block ${className}`}
+      style={style}
+    >
+      {words.map((word, wordIndex) => (
+        <span key={wordIndex} className="inline-block whitespace-nowrap">
+          {word.split("").map((char, charIndex) => (
+            <motion.span key={charIndex} variants={charVariants} className="inline-block">
+              {char}
+            </motion.span>
+          ))}
+          {wordIndex < words.length - 1 && <span className="inline-block">&nbsp;</span>}
+        </span>
+      ))}
+    </motion.span>
+  );
+};
+
 const HeroSection = () => {
   const [activeSlide, setActiveSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -138,17 +187,12 @@ const HeroSection = () => {
             </motion.div>
 
             {/* Heading */}
-            <motion.h1
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.15 }}
-              className="max-w-xl text-4xl font-extrabold leading-[1.12] tracking-tight text-slate-950 sm:text-5xl lg:text-[56px]"
-            >
-              {currentSlide.title}
+            <h1 className="max-w-xl text-4xl font-extrabold leading-[1.12] tracking-tight text-slate-950 sm:text-5xl lg:text-[56px]">
+              <CharByCharText text={currentSlide.title} delay={0.08} />
               <span className="block" style={{ color: currentSlide.accent }}>
-                {currentSlide.highlight}
+                <CharByCharText text={currentSlide.highlight} delay={0.32} />
               </span>
-            </motion.h1>
+            </h1>
 
             {/* Description */}
             <motion.p
