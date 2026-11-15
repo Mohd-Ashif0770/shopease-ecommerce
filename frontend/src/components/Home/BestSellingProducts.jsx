@@ -85,7 +85,7 @@ const BestSellingProducts = () => {
       {/* Staggered Products Grid */}
       {!loading && !error && products.length > 0 && (
         <motion.div
-          variants={staggerContainer(0.15, 0.1)}
+          variants={staggerContainer(0.10, 0.05)}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.22 }}

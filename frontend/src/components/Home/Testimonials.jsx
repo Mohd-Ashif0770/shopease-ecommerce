@@ -1,7 +1,6 @@
-import { useRef } from "react";
-import { motion } from "motion/react";
+import { useState } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import { ChevronLeft, ChevronRight, Star, Quote } from "lucide-react";
-import { staggerContainer, staggerItem } from "../../utils/motion";
 
 const testimonials = [
   {
@@ -52,24 +51,26 @@ const testimonials = [
 ];
 
 const Testimonials = () => {
-  const scrollRef = useRef(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [direction, setDirection] = useState("next");
 
-  const scroll = (direction) => {
-    if (!scrollRef.current) return;
-
-    const container = scrollRef.current;
-    const card = container.querySelector("article");
-
-    if (!card) return;
-
-    const gap = 16;
-    const scrollAmount = card.offsetWidth + gap;
-
-    container.scrollBy({
-      left: direction === "next" ? scrollAmount : -scrollAmount,
-      behavior: "smooth",
-    });
+  const handleNext = () => {
+    setDirection("next");
+    setCurrentIndex((prev) => (prev + 1) % testimonials.length);
   };
+
+  const handlePrev = () => {
+    setDirection("prev");
+    setCurrentIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length);
+  };
+
+  // Get 3 visible cards starting from currentIndex
+  const len = testimonials.length;
+  const visibleCards = [
+    testimonials[currentIndex % len],
+    testimonials[(currentIndex + 1) % len],
+    testimonials[(currentIndex + 2) % len],
+  ];
 
   return (
     <section className="py-8 sm:py-12 lg:py-14">
@@ -92,7 +93,7 @@ const Testimonials = () => {
               whileHover={{ scale: 1.08 }}
               whileTap={{ scale: 0.92 }}
               type="button"
-              onClick={() => scroll("prev")}
+              onClick={handlePrev}
               aria-label="Previous testimonials"
               className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-xs transition-colors hover:border-[#087443] hover:bg-emerald-50 hover:text-[#087443]"
             >
@@ -103,7 +104,7 @@ const Testimonials = () => {
               whileHover={{ scale: 1.08 }}
               whileTap={{ scale: 0.92 }}
               type="button"
-              onClick={() => scroll("next")}
+              onClick={handleNext}
               aria-label="Next testimonials"
               className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-xs transition-colors hover:border-[#087443] hover:bg-emerald-50 hover:text-[#087443]"
             >
@@ -112,70 +113,95 @@ const Testimonials = () => {
           </div>
         </div>
 
-        {/* Testimonial Cards Staggered */}
-        <motion.div
-          variants={staggerContainer(0.15, 0.1)}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.15 }}
-          ref={scrollRef}
-          className="flex snap-x snap-mandatory gap-4 overflow-x-auto overflow-y-hidden scroll-smooth pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-        >
-          {testimonials.map((testimonial) => (
-            <motion.article
-              key={testimonial.id}
-              variants={staggerItem}
-              whileHover={{ y: -4 }}
-              transition={{ duration: 0.25 }}
-              className="group relative flex w-[88%] shrink-0 snap-start flex-col justify-between gap-4 rounded-2xl border border-slate-200/90 bg-white p-6 shadow-xs transition-all duration-300 hover:border-emerald-200 hover:shadow-xl hover:shadow-slate-200/50 sm:w-[calc((100%-1rem)/2)] sm:flex-row sm:items-start lg:w-[calc((100%-2rem)/3)]"
+        {/* Testimonial Cards Animated Container */}
+        <div className="relative overflow-hidden min-h-[220px]">
+          <AnimatePresence mode="wait" custom={direction}>
+            <motion.div
+              key={currentIndex}
+              initial={{ opacity: 0, x: direction === "next" ? 50 : -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: direction === "next" ? -50 : 50 }}
+              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+              className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
             >
-              {/* Decorative Quote Icon */}
-              <Quote
-                size={36}
-                className="absolute right-5 top-5 text-slate-100 transition-colors group-hover:text-emerald-100"
-              />
+              {visibleCards.map((testimonial, idx) => (
+                <motion.article
+                  key={`${testimonial.id}-${idx}`}
+                  whileHover={{ y: -4 }}
+                  transition={{ duration: 0.25 }}
+                  className={`group relative flex flex-col justify-between gap-4 rounded-2xl border border-slate-200/90 bg-white p-6 shadow-xs transition-all duration-300 hover:border-emerald-200 hover:shadow-xl hover:shadow-slate-200/50 ${
+                    idx === 1 ? "hidden sm:flex" : ""
+                  } ${idx === 2 ? "hidden lg:flex" : ""}`}
+                >
+                  {/* Decorative Quote Icon */}
+                  <Quote
+                    size={36}
+                    className="absolute right-5 top-5 text-slate-100 transition-colors group-hover:text-emerald-100"
+                  />
 
-              {/* Customer Image */}
-              <img
-                src={testimonial.image}
-                alt={testimonial.name}
-                className="h-14 w-14 shrink-0 rounded-full border-2 border-slate-100 object-cover shadow-xs"
-                loading="lazy"
-              />
+                  {/* Customer Image */}
+                  <img
+                    src={testimonial.image}
+                    alt={testimonial.name}
+                    className="h-14 w-14 shrink-0 rounded-full border-2 border-slate-100 object-cover shadow-xs"
+                    loading="lazy"
+                  />
 
-              {/* Review Content */}
-              <div className="relative z-10 min-w-0 flex-1">
-                <p className="min-h-[48px] text-sm leading-relaxed text-slate-600">
-                  "{testimonial.review}"
-                </p>
+                  {/* Review Content */}
+                  <div className="relative z-10 min-w-0 flex-1">
+                    <p className="min-h-[48px] text-sm leading-relaxed text-slate-600">
+                      "{testimonial.review}"
+                    </p>
 
-                {/* Rating */}
-                <div className="mt-3 flex items-center gap-1">
-                  {Array.from({ length: testimonial.rating }).map(
-                    (_, index) => (
-                      <Star
-                        key={index}
-                        size={15}
-                        className="fill-amber-400 text-amber-400"
-                      />
-                    )
-                  )}
-                </div>
+                    {/* Rating */}
+                    <div className="mt-3 flex items-center gap-1">
+                      {Array.from({ length: testimonial.rating }).map(
+                        (_, index) => (
+                          <Star
+                            key={index}
+                            size={15}
+                            className="fill-amber-400 text-amber-400"
+                          />
+                        )
+                      )}
+                    </div>
 
-                {/* Customer Details */}
-                <div className="mt-2.5">
-                  <h3 className="text-sm font-bold text-slate-900">
-                    {testimonial.name}
-                  </h3>
+                    {/* Customer Details */}
+                    <div className="mt-2.5">
+                      <h3 className="text-sm font-bold text-slate-900">
+                        {testimonial.name}
+                      </h3>
 
-                  <p className="mt-0.5 text-xs font-medium text-emerald-700">
-                    {testimonial.role}
-                  </p>
-                </div>
-              </div>
-            </motion.article>
+                      <p className="mt-0.5 text-xs font-medium text-emerald-700">
+                        {testimonial.role}
+                      </p>
+                    </div>
+                  </div>
+                </motion.article>
+              ))}
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        {/* Carousel Indicators */}
+        <div className="mt-6 flex justify-center items-center gap-2">
+          {testimonials.map((_, idx) => (
+            <button
+              key={idx}
+              type="button"
+              onClick={() => {
+                setDirection(idx > currentIndex ? "next" : "prev");
+                setCurrentIndex(idx);
+              }}
+              className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
+                currentIndex === idx
+                  ? "w-6 bg-[#087443]"
+                  : "w-2 bg-slate-200 hover:bg-slate-300"
+              }`}
+              aria-label={`Go to testimonial ${idx + 1}`}
+            />
           ))}
-        </motion.div>
+        </div>
       </div>
     </section>
   );
