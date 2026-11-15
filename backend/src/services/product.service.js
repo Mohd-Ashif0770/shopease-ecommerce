@@ -131,6 +131,7 @@ export const getProductsService = async (query) => {
     limit = "10",
     search = "",
     category_id,
+    category,
     minPrice,
     maxPrice,
     sortBy = "created_at",
@@ -173,14 +174,36 @@ export const getProductsService = async (query) => {
     throw appError(400, "order must be asc or desc");
   }
 
-  // Validate category
-  if (
-    category_id !== undefined &&
-    (!/^\d+$/.test(String(category_id)) ||
-      Number(category_id) < 1 ||
-      !Number.isSafeInteger(Number(category_id)))
-  ) {
-    throw appError(400, "category_id must be a positive integer");
+  // Determine category filter (id or slug)
+  let effectiveCategoryId;
+  let effectiveCategorySlug;
+
+  if (category_id !== undefined && category_id !== null && String(category_id).trim() !== "") {
+    const catIdStr = String(category_id).trim();
+    if (
+      !/^\d+$/.test(catIdStr) ||
+      Number(catIdStr) < 1 ||
+      !Number.isSafeInteger(Number(catIdStr))
+    ) {
+      throw appError(400, "category_id must be a positive integer");
+    }
+    effectiveCategoryId = Number(catIdStr);
+  }
+
+  if (category !== undefined && category !== null && String(category).trim() !== "") {
+    const catStr = String(category).trim();
+    if (/^\d+$/.test(catStr)) {
+      if (effectiveCategoryId === undefined) {
+        if (Number(catStr) < 1 || !Number.isSafeInteger(Number(catStr))) {
+          throw appError(400, "category must be a positive integer or valid slug");
+        }
+        effectiveCategoryId = Number(catStr);
+      }
+    } else {
+      if (effectiveCategoryId === undefined) {
+        effectiveCategorySlug = catStr;
+      }
+    }
   }
 
   // Validate price filters
@@ -217,15 +240,20 @@ export const getProductsService = async (query) => {
   // Build parameterized filters
   const conditions = ["p.is_active = TRUE"];
   const params = [];
+  let joinClause = "";
 
   if (search.trim()) {
     conditions.push("p.name LIKE ?");
     params.push(`%${search.trim()}%`);
   }
 
-  if (category_id !== undefined) {
+  if (effectiveCategoryId !== undefined) {
     conditions.push("p.category_id = ?");
-    params.push(Number(category_id));
+    params.push(effectiveCategoryId);
+  } else if (effectiveCategorySlug !== undefined) {
+    joinClause = " JOIN categories c ON p.category_id = c.id ";
+    conditions.push("c.slug = ?");
+    params.push(effectiveCategorySlug);
   }
 
   if (minPriceNumber !== undefined) {
@@ -244,6 +272,7 @@ export const getProductsService = async (query) => {
   const [countRows] = await pool.execute(
     `SELECT COUNT(*) AS total
      FROM products p
+     ${joinClause}
      WHERE ${whereClause}`,
     params,
   );
@@ -264,6 +293,7 @@ export const getProductsService = async (query) => {
        p.created_at,
        p.updated_at
      FROM products p
+     ${joinClause}
      WHERE ${whereClause}
      ORDER BY ${sortColumn} ${sortOrder.toUpperCase()}, p.id DESC
      LIMIT ? OFFSET ?`,

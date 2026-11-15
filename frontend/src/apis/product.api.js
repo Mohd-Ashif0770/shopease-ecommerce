@@ -9,6 +9,7 @@ export const getProductsAPI = async (
   maxPrice,
   sortBy,
   order,
+  category,
 ) => {
   const response = await api.get("/products", {
     params: {
@@ -16,6 +17,7 @@ export const getProductsAPI = async (
       limit,
       search,
       category_id,
+      category,
       minPrice,
       maxPrice,
       sortBy,

@@ -1,7 +1,9 @@
-import { useState } from "react";
-import { useSelector } from "react-redux";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { motion, AnimatePresence } from "motion/react";
 import { ChevronDown, Filter, RotateCcw } from "lucide-react";
+
+import { fetchCategories } from "../../redux/features/categorySlice";
 
 const brands = [
   "Apple",
@@ -17,22 +19,44 @@ const brands = [
 
 const ratings = [5, 4, 3, 2];
 
-const ProductFilters = ({ onFiltersChange }) => {
+const ProductFilters = ({ activeFilters, onFiltersChange }) => {
+  const dispatch = useDispatch();
   const { categories } = useSelector((state) => state.categories);
 
   const [filters, setFilters] = useState({
-    category_id: null,
-    minPrice: 0,
-    maxPrice: 200000,
+    category_id: activeFilters?.category_id || null,
+    category: activeFilters?.category || null,
+    minPrice: activeFilters?.minPrice ?? 0,
+    maxPrice: activeFilters?.maxPrice ?? 200000,
   });
 
   const [priceInputs, setPriceInputs] = useState({
-    minPrice: "0",
-    maxPrice: "200000",
+    minPrice: String(activeFilters?.minPrice ?? 0),
+    maxPrice: String(activeFilters?.maxPrice ?? 200000),
   });
 
   const [showAllCategories, setShowAllCategories] = useState(false);
   const [showAllBrands, setShowAllBrands] = useState(false);
+
+  // Fetch categories if not yet loaded
+  useEffect(() => {
+    if (categories.length === 0) {
+      dispatch(fetchCategories());
+    }
+  }, [dispatch, categories.length]);
+
+  // Keep internal filter state synced with parent activeFilters
+  useEffect(() => {
+    if (activeFilters) {
+      setFilters((prev) => ({
+        ...prev,
+        category: activeFilters.category ?? null,
+        category_id: activeFilters.category_id ?? null,
+        minPrice: activeFilters.minPrice ?? prev.minPrice,
+        maxPrice: activeFilters.maxPrice ?? prev.maxPrice,
+      }));
+    }
+  }, [activeFilters]);
 
   const updateFilter = (key, value) => {
     const updatedFilters = {
@@ -51,9 +75,26 @@ const ProductFilters = ({ onFiltersChange }) => {
     onFiltersChange?.(updatedFilters);
   };
 
+  const handleCategoryToggle = (category) => {
+    const isChecked =
+      filters.category === category.slug ||
+      filters.category_id === category.id ||
+      String(filters.category_id) === String(category.id);
+
+    const updatedFilters = {
+      ...filters,
+      category: isChecked ? null : category.slug,
+      category_id: null,
+    };
+
+    setFilters(updatedFilters);
+    onFiltersChange?.(updatedFilters);
+  };
+
   const clearFilters = () => {
     const defaultFilters = {
       category_id: null,
+      category: null,
       minPrice: 0,
       maxPrice: 200000,
     };
@@ -168,15 +209,12 @@ const ProductFilters = ({ onFiltersChange }) => {
                   <span className="flex items-center gap-3 text-slate-700">
                     <input
                       type="checkbox"
-                      checked={filters.category_id === category.id}
-                      onChange={() =>
-                        updateFilter(
-                          "category_id",
-                          filters.category_id === category.id
-                            ? null
-                            : category.id,
-                        )
+                      checked={
+                        filters.category === category.slug ||
+                        filters.category_id === category.id ||
+                        String(filters.category_id) === String(category.id)
                       }
+                      onChange={() => handleCategoryToggle(category)}
                       className="h-4 w-4 cursor-pointer rounded-md accent-[#087443]"
                     />
                     {category.name}

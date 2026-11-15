@@ -26,6 +26,8 @@ export const getProductsController = async (req, res, next) => {
   }
 };
 
+//product details controller(s)
+
 export const updateProductController = async (req, res, next) => {
   try {
     const product = await updateProductService(

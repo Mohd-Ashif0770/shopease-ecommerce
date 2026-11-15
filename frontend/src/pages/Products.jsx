@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useSearchParams } from "react-router-dom";
 
 import ProductFilters from "../components/products/ProductFilters";
 import ProductsHeader from "../components/products/ProductsHeader";
@@ -12,14 +13,25 @@ import { fetchProducts } from "../redux/features/productSlice";
 
 const DEFAULT_FILTERS = {
   category_id: null,
+  category: null,
   minPrice: 0,
   maxPrice: 200000,
 };
 
 const Products = () => {
-  const [filters, setFilters] = useState(DEFAULT_FILTERS);
-  const [search, setSearch] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const categoryParam = searchParams.get("category");
+  const categoryIdParam = searchParams.get("category_id");
+  const urlSearchParam = searchParams.get("search");
+
+  const [filters, setFilters] = useState(() => ({
+    ...DEFAULT_FILTERS,
+    category: categoryParam || null,
+    category_id: categoryIdParam || null,
+  }));
+  const [search, setSearch] = useState(urlSearchParam || "");
+  const [debouncedSearch, setDebouncedSearch] = useState(urlSearchParam || "");
   const [sortBy, setSortBy] = useState("created_at");
   const [order, setOrder] = useState("desc");
   const [currentPage, setCurrentPage] = useState(1);
@@ -32,6 +44,31 @@ const Products = () => {
     loading,
     error,
   } = useSelector((state) => state.products);
+
+  // Synchronize state when URL search parameters change externally
+  useEffect(() => {
+    const currentCategory = searchParams.get("category");
+    const currentCategoryId = searchParams.get("category_id");
+    const currentSearch = searchParams.get("search");
+
+    setFilters((prev) => {
+      const nextCategory = currentCategory || null;
+      const nextCategoryId = currentCategoryId || null;
+
+      if (prev.category !== nextCategory || prev.category_id !== nextCategoryId) {
+        return {
+          ...prev,
+          category: nextCategory,
+          category_id: nextCategoryId,
+        };
+      }
+      return prev;
+    });
+
+    if (currentSearch !== null && currentSearch !== search) {
+      setSearch(currentSearch);
+    }
+  }, [searchParams]);
 
   // Debounce search input
   useEffect(() => {
@@ -50,6 +87,7 @@ const Products = () => {
         limit: 8,
         search: debouncedSearch,
         category_id: filters.category_id || undefined,
+        category: filters.category || undefined,
         minPrice: filters.minPrice,
         maxPrice: filters.maxPrice,
         sortBy,
@@ -65,10 +103,25 @@ const Products = () => {
     order,
   ]);
 
-  // Reset pagination when filters change
+  // Reset pagination when filters change & update URL query string
   const handleFiltersChange = (newFilters) => {
     setFilters(newFilters);
     setCurrentPage(1);
+
+    const updatedParams = new URLSearchParams(searchParams);
+
+    if (newFilters.category) {
+      updatedParams.set("category", newFilters.category);
+      updatedParams.delete("category_id");
+    } else if (newFilters.category_id) {
+      updatedParams.set("category_id", newFilters.category_id);
+      updatedParams.delete("category");
+    } else {
+      updatedParams.delete("category");
+      updatedParams.delete("category_id");
+    }
+
+    setSearchParams(updatedParams, { replace: true });
   };
 
   // Reset pagination when search changes
@@ -97,6 +150,7 @@ const Products = () => {
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-[286px_1fr]">
             {/* Filters */}
             <ProductFilters
+              activeFilters={filters}
               onFiltersChange={handleFiltersChange}
             />
 

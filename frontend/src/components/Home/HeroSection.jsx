@@ -22,7 +22,7 @@ const slides = [
     link: "/products",
     promotionTitle: "Modern Furniture",
     promotionDiscount: "Up to 40% Off",
-    promotionLink: "/products?category=home-living",
+    promotionLink: "/products?category=home-and-lifestyle",
     overlay: "from-[#f4f8f5]/95 via-[#f4f8f5]/80 to-transparent",
     accent: "#087443",
   },

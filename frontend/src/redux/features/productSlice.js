@@ -43,6 +43,7 @@ export const fetchProducts =
         limit = 8,
         search = "",
         category_id,
+        category,
         minPrice,
         maxPrice,
         sortBy = "created_at",
@@ -58,6 +59,7 @@ export const fetchProducts =
         maxPrice,
         sortBy,
         order,
+        category,
       );
 
       dispatch(
