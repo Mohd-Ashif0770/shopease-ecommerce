@@ -20,8 +20,4 @@ redisClient.on("connect", () => {
   console.log("Connecting to Redis...");
 });
 
-redisClient.on("ready", () => {
-  console.log("Redis connected and ready");
-});
-
 export default redisClient;

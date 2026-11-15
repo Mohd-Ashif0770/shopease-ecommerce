@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useSelector } from "react-redux";
+import { motion, AnimatePresence } from "motion/react";
 import { ChevronDown, Filter, RotateCcw } from "lucide-react";
 
 const brands = [
@@ -67,7 +68,6 @@ const ProductFilters = ({ onFiltersChange }) => {
   };
 
   const handlePriceInputChange = (key, value) => {
-    // Allow empty input while typing
     if (value === "") {
       setPriceInputs((prev) => ({
         ...prev,
@@ -77,44 +77,36 @@ const ProductFilters = ({ onFiltersChange }) => {
     }
 
     const numberValue = Number(value);
-
     if (!Number.isFinite(numberValue) || numberValue < 0) return;
 
     if (key === "minPrice") {
       const validValue = Math.min(numberValue, filters.maxPrice);
-
       setPriceInputs((prev) => ({
         ...prev,
         minPrice: value,
       }));
-
       updateFilter("minPrice", validValue);
     } else {
       const validValue = Math.max(
         filters.minPrice,
         Math.min(numberValue, 200000),
       );
-
       setPriceInputs((prev) => ({
         ...prev,
         maxPrice: value,
       }));
-
       updateFilter("maxPrice", validValue);
     }
   };
 
   const handlePriceInputBlur = (key) => {
     const value = priceInputs[key];
-
     if (value === "") {
       const fallback = key === "minPrice" ? 0 : 200000;
-
       setPriceInputs((prev) => ({
         ...prev,
         [key]: String(fallback),
       }));
-
       updateFilter(key, fallback);
       return;
     }
@@ -132,66 +124,83 @@ const ProductFilters = ({ onFiltersChange }) => {
   const visibleBrands = showAllBrands ? brands : brands.slice(0, 5);
 
   return (
-    <aside className="h-fit w-full rounded-xl border border-slate-200 bg-white">
+    <motion.aside
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+      className="h-fit w-full rounded-2xl border border-slate-200/90 bg-white shadow-xs"
+    >
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
+      <div className="flex items-center justify-between border-b border-slate-200/80 px-5 py-4">
         <h2 className="flex items-center gap-2 font-heading text-base font-bold text-slate-900">
-          <Filter size={17} />
+          <Filter size={17} className="text-emerald-700" />
           Filters
         </h2>
 
-        <button
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
           type="button"
           onClick={clearFilters}
-          className="text-xs cursor-pointer font-semibold text-emerald-700 transition-colors hover:text-emerald-900"
+          className="flex items-center gap-1 text-xs font-semibold cursor-pointer text-emerald-700 hover:text-emerald-900"
         >
+          <RotateCcw size={12} />
           Clear All
-        </button>
+        </motion.button>
       </div>
 
-      <div className="divide-y divide-slate-200 px-5">
+      <div className="divide-y divide-slate-100 px-5">
         {/* Categories */}
         <section className="py-4">
           <h3 className="mb-3 text-sm font-bold text-slate-900">Categories</h3>
 
-          <div className="space-y-3">
-            {visibleCategories.map((category) => (
-              <label
-                key={category.id}
-                className="flex cursor-pointer items-center justify-between gap-3 text-sm"
-              >
-                <span className="flex items-center gap-3 text-slate-700">
-                  <input
-                    type="checkbox"
-                    checked={filters.category_id === category.id}
-                    onChange={() =>
-                      updateFilter(
-                        "category_id",
-                        filters.category_id === category.id
-                          ? null
-                          : category.id,
-                      )
-                    }
-                    className="h-4 w-4 cursor-pointer accent-emerald-700"
-                  />
-                  {category.name}
-                </span>
-              </label>
-            ))}
+          <div className="space-y-2.5">
+            <AnimatePresence initial={false}>
+              {visibleCategories.map((category) => (
+                <motion.label
+                  key={category.id}
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="flex cursor-pointer items-center justify-between gap-3 text-sm transition-colors hover:text-emerald-800"
+                >
+                  <span className="flex items-center gap-3 text-slate-700">
+                    <input
+                      type="checkbox"
+                      checked={filters.category_id === category.id}
+                      onChange={() =>
+                        updateFilter(
+                          "category_id",
+                          filters.category_id === category.id
+                            ? null
+                            : category.id,
+                        )
+                      }
+                      className="h-4 w-4 cursor-pointer rounded-md accent-[#087443]"
+                    />
+                    {category.name}
+                  </span>
+                </motion.label>
+              ))}
+            </AnimatePresence>
           </div>
 
           {categories.length > 6 && (
-            <button
+            <motion.button
+              whileTap={{ scale: 0.95 }}
               type="button"
               onClick={() => setShowAllCategories((prev) => !prev)}
-              className="mt-3 flex items-center gap-1 cursor-pointer text-xs font-semibold text-emerald-700 hover:text-emerald-900"
+              className="mt-3 flex items-center gap-1 cursor-pointer text-xs font-semibold text-[#087443] hover:text-emerald-900"
             >
               {showAllCategories ? "Show Less" : "Show More"}
               <ChevronDown
                 size={14}
-                className={showAllCategories ? "rotate-180" : ""}
+                className={`transition-transform duration-200 ${
+                  showAllCategories ? "rotate-180" : ""
+                }`}
               />
-            </button>
+            </motion.button>
           )}
         </section>
 
@@ -207,7 +216,7 @@ const ProductFilters = ({ onFiltersChange }) => {
 
               {/* Selected Range */}
               <div
-                className="absolute h-1.5 rounded-full bg-emerald-700"
+                className="absolute h-1.5 rounded-full bg-[#087443] transition-all duration-150"
                 style={{
                   left: `${(filters.minPrice / 200000) * 100}%`,
                   right: `${100 - (filters.maxPrice / 200000) * 100}%`,
@@ -226,7 +235,6 @@ const ProductFilters = ({ onFiltersChange }) => {
                     Number(e.target.value),
                     filters.maxPrice,
                   );
-
                   updateFilter("minPrice", value);
                 }}
                 className="range-slider range-slider-min"
@@ -245,7 +253,6 @@ const ProductFilters = ({ onFiltersChange }) => {
                     Number(e.target.value),
                     filters.minPrice,
                   );
-
                   updateFilter("maxPrice", value);
                 }}
                 className="range-slider range-slider-max"
@@ -255,7 +262,6 @@ const ProductFilters = ({ onFiltersChange }) => {
 
             {/* Price Inputs */}
             <div className="flex items-center gap-2">
-              {/* Minimum Price */}
               <input
                 type="number"
                 min="0"
@@ -266,12 +272,11 @@ const ProductFilters = ({ onFiltersChange }) => {
                 }
                 onBlur={() => handlePriceInputBlur("minPrice")}
                 placeholder="Min"
-                className="h-10 w-full min-w-0 rounded-lg border border-slate-200 px-3 text-sm outline-none focus:border-emerald-700"
+                className="h-10 w-full min-w-0 rounded-xl border border-slate-200 px-3 text-sm outline-none transition-colors focus:border-[#087443] focus:ring-2 focus:ring-emerald-700/10"
               />
 
               <span className="text-slate-400">–</span>
 
-              {/* Maximum Price */}
               <input
                 type="number"
                 min={filters.minPrice}
@@ -282,7 +287,7 @@ const ProductFilters = ({ onFiltersChange }) => {
                 }
                 onBlur={() => handlePriceInputBlur("maxPrice")}
                 placeholder="Max"
-                className="h-10 w-full min-w-0 rounded-lg border border-slate-200 px-3 text-sm outline-none focus:border-emerald-700"
+                className="h-10 w-full min-w-0 rounded-xl border border-slate-200 px-3 text-sm outline-none transition-colors focus:border-[#087443] focus:ring-2 focus:ring-emerald-700/10"
               />
             </div>
           </div>
@@ -292,33 +297,42 @@ const ProductFilters = ({ onFiltersChange }) => {
         <section className="py-4">
           <h3 className="mb-3 text-sm font-bold text-slate-900">Brand</h3>
 
-          <div className="space-y-3">
-            {visibleBrands.map((brand) => (
-              <label
-                key={brand}
-                className="flex cursor-pointer items-center gap-3 text-sm text-slate-700"
-              >
-                <input
-                  type="checkbox"
-                  className="h-4 w-4 cursor-pointer accent-emerald-700"
-                />
-                {brand}
-              </label>
-            ))}
+          <div className="space-y-2.5">
+            <AnimatePresence initial={false}>
+              {visibleBrands.map((brand) => (
+                <motion.label
+                  key={brand}
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="flex cursor-pointer items-center gap-3 text-sm text-slate-700 transition-colors hover:text-emerald-800"
+                >
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4 cursor-pointer rounded-md accent-[#087443]"
+                  />
+                  {brand}
+                </motion.label>
+              ))}
+            </AnimatePresence>
           </div>
 
           {brands.length > 5 && (
-            <button
+            <motion.button
+              whileTap={{ scale: 0.95 }}
               type="button"
               onClick={() => setShowAllBrands((prev) => !prev)}
-              className="mt-3 flex items-center gap-1 text-xs font-semibold cursor-pointer text-emerald-700 hover:text-emerald-900"
+              className="mt-3 flex items-center gap-1 cursor-pointer text-xs font-semibold text-[#087443] hover:text-emerald-900"
             >
               {showAllBrands ? "Show Less" : "Show More"}
               <ChevronDown
                 size={14}
-                className={showAllBrands ? "rotate-180" : ""}
+                className={`transition-transform duration-200 ${
+                  showAllBrands ? "rotate-180" : ""
+                }`}
               />
-            </button>
+            </motion.button>
           )}
         </section>
 
@@ -326,7 +340,7 @@ const ProductFilters = ({ onFiltersChange }) => {
         <section className="py-4">
           <h3 className="mb-3 text-sm font-bold text-slate-900">Rating</h3>
 
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             {ratings.map((rating) => (
               <label
                 key={rating}
@@ -336,7 +350,7 @@ const ProductFilters = ({ onFiltersChange }) => {
                   <input
                     type="radio"
                     name="product-rating"
-                    className="h-4 w-4 cursor-pointer accent-emerald-700"
+                    className="h-4 w-4 cursor-pointer accent-[#087443]"
                   />
 
                   <span className="flex items-center gap-0.5 text-amber-400">
@@ -361,7 +375,7 @@ const ProductFilters = ({ onFiltersChange }) => {
           </div>
         </section>
       </div>
-    </aside>
+    </motion.aside>
   );
 };
 

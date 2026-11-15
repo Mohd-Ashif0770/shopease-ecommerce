@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -7,6 +6,7 @@ import ProductsHeader from "../components/products/ProductsHeader";
 import ProductToolbar from "../components/products/ProductToolbar";
 import ProductList from "../components/products/ProductList";
 import ProductPagination from "../components/products/ProductPagination";
+import AnimatedSection from "../components/motion/AnimatedSection";
 
 import { fetchProducts } from "../redux/features/productSlice";
 
@@ -89,50 +89,50 @@ const Products = () => {
   };
 
   return (
-    <>
+    <main className="bg-slate-50 min-h-screen">
       <ProductsHeader />
 
-      <div className="mx-auto max-w-[1440px] px-6 pt-12 pb-20 sm:px-8 lg:px-10">
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[286px_1fr]">
-
-          {/* Filters */}
-          <ProductFilters
-            onFiltersChange={handleFiltersChange}
-          />
-
-          {/* Products Content */}
-          <div className="min-w-0 space-y-6">
-
-            <ProductToolbar
-              totalProducts={pagination?.totalProducts || 0}
-              currentPage={pagination?.page || 1}
-              limit={pagination?.limit || 12}
-              search={search}
-              sortBy={sortBy}
-              order={order}
-              onSearchChange={handleSearchChange}
-              onSortChange={handleSortChange}
+      <AnimatedSection>
+        <div className="mx-auto max-w-[1440px] px-6 pt-10 pb-20 sm:px-8 lg:px-10">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[286px_1fr]">
+            {/* Filters */}
+            <ProductFilters
+              onFiltersChange={handleFiltersChange}
             />
 
-            {/* Product List */}
-            <ProductList
-              products={products}
-              loading={loading}
-              error={error}
-            />
-
-            {/* Pagination */}
-            {!loading && !error && (
-              <ProductPagination
+            {/* Products Content */}
+            <div className="min-w-0 space-y-6">
+              <ProductToolbar
+                totalProducts={pagination?.totalProducts || 0}
                 currentPage={pagination?.page || 1}
-                totalPages={pagination?.totalPages || 1}
-                onPageChange={handlePageChange}
+                limit={pagination?.limit || 12}
+                search={search}
+                sortBy={sortBy}
+                order={order}
+                onSearchChange={handleSearchChange}
+                onSortChange={handleSortChange}
               />
-            )}
+
+              {/* Product List */}
+              <ProductList
+                products={products}
+                loading={loading}
+                error={error}
+              />
+
+              {/* Pagination */}
+              {!loading && !error && (
+                <ProductPagination
+                  currentPage={pagination?.page || 1}
+                  totalPages={pagination?.totalPages || 1}
+                  onPageChange={handlePageChange}
+                />
+              )}
+            </div>
           </div>
         </div>
-      </div>
-    </>
+      </AnimatedSection>
+    </main>
   );
 };
 

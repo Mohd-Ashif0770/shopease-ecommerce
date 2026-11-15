@@ -1,4 +1,4 @@
-
+import { motion } from "motion/react";
 import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react";
 
 const ProductPagination = ({
@@ -43,23 +43,25 @@ const ProductPagination = ({
   const pageNumbers = getPageNumbers();
 
   const buttonClass =
-    "flex h-10 min-w-10 items-center justify-center rounded-lg border text-sm font-medium transition-all duration-200";
+    "flex h-10 min-w-10 items-center justify-center rounded-xl border text-sm font-medium transition-all duration-200 cursor-pointer";
 
   return (
     <nav
       aria-label="Product pagination"
-      className="flex items-center justify-center gap-2 pt-6"
+      className="flex items-center justify-center gap-2 pt-8"
     >
-      {/* Previous */}
-      <button
+      {/* Previous Page */}
+      <motion.button
+        whileHover={{ scale: currentPage === 1 ? 1 : 1.05 }}
+        whileTap={{ scale: currentPage === 1 ? 1 : 0.92 }}
         type="button"
         disabled={currentPage === 1}
         onClick={() => onPageChange?.(currentPage - 1)}
         aria-label="Previous page"
-        className={`${buttonClass} cursor-pointer border-slate-200 text-slate-700 hover:border-emerald-700 hover:text-emerald-700 disabled:cursor-not-allowed disabled:opacity-40`}
+        className={`${buttonClass} border-slate-200 bg-white text-slate-700 hover:border-[#087443] hover:text-[#087443] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-slate-200 disabled:hover:text-slate-700`}
       >
         <ChevronLeft size={19} />
-      </button>
+      </motion.button>
 
       {/* Page Numbers */}
       {pageNumbers.map((page, index) => {
@@ -67,7 +69,7 @@ const ProductPagination = ({
           return (
             <span
               key={`ellipsis-${index}`}
-              className="flex h-10 w-8 items-center justify-center text-slate-500"
+              className="flex h-10 w-8 items-center justify-center text-slate-400"
             >
               <MoreHorizontal size={19} />
             </span>
@@ -77,33 +79,37 @@ const ProductPagination = ({
         const isActive = currentPage === page;
 
         return (
-          <button
+          <motion.button
             key={page}
+            whileHover={{ scale: 1.06 }}
+            whileTap={{ scale: 0.94 }}
             type="button"
             onClick={() => onPageChange?.(page)}
             aria-label={`Go to page ${page}`}
             aria-current={isActive ? "page" : undefined}
             className={`${buttonClass} ${
               isActive
-                ? "border-emerald-800 bg-emerald-800 text-white shadow-sm cursor-pointer"
-                : "border-slate-200 bg-white text-slate-700 hover:border-emerald-700 hover:text-emerald-700 cursor-pointer"
+                ? "border-[#087443] bg-[#087443] font-bold text-white shadow-xs"
+                : "border-slate-200 bg-white text-slate-700 hover:border-[#087443] hover:text-[#087443]"
             }`}
           >
             {page}
-          </button>
+          </motion.button>
         );
       })}
 
-      {/* Next */}
-      <button
+      {/* Next Page */}
+      <motion.button
+        whileHover={{ scale: currentPage === totalPages ? 1 : 1.05 }}
+        whileTap={{ scale: currentPage === totalPages ? 1 : 0.92 }}
         type="button"
         disabled={currentPage === totalPages}
         onClick={() => onPageChange?.(currentPage + 1)}
         aria-label="Next page"
-        className={`${buttonClass} cursor-pointer border-slate-200 text-slate-700 hover:border-emerald-700 hover:text-emerald-700 disabled:cursor-not-allowed disabled:opacity-40`}
+        className={`${buttonClass} border-slate-200 bg-white text-slate-700 hover:border-[#087443] hover:text-[#087443] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-slate-200 disabled:hover:text-slate-700`}
       >
         <ChevronRight size={19} />
-      </button>
+      </motion.button>
     </nav>
   );
 };
