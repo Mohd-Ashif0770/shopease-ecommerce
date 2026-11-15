@@ -28,6 +28,11 @@ export const getProductsAPI = async (
   return response.data;
 };
 
+export const getProductDetailsAPI = async (identifier) => {
+  const response = await api.get(`/products/${identifier}`);
+  return response.data;
+};
+
 export const createProductsAPI = async (data) => {
   const response = await api.post("/products", data);
   return response.data;

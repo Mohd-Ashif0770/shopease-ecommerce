@@ -1,10 +1,13 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { getProductsAPI } from "../../apis/product.api";
+import { getProductDetailsAPI, getProductsAPI } from "../../apis/product.api";
 
 const initialState = {
   products: [],
+  currentProduct: null,
   loading: false,
+  detailsLoading: false,
   error: null,
+  detailsError: null,
   pagination: null,
 };
 
@@ -24,13 +27,31 @@ const productSlice = createSlice({
     setProductError: (state, action) => {
       state.error = action.payload;
     },
+
+    setCurrentProduct: (state, action) => {
+      state.currentProduct = action.payload;
+    },
+
+    setDetailsLoading: (state, action) => {
+      state.detailsLoading = action.payload;
+    },
+
+    setDetailsError: (state, action) => {
+      state.detailsError = action.payload;
+    },
   },
 });
 
-export const { setProducts, setProductLoading, setProductError } =
-  productSlice.actions;
+export const {
+  setProducts,
+  setProductLoading,
+  setProductError,
+  setCurrentProduct,
+  setDetailsLoading,
+  setDetailsError,
+} = productSlice.actions;
 
-// Async action creator (without createAsyncThunk)
+// Async action creator for fetching product list
 export const fetchProducts =
   (params = {}) =>
   async (dispatch) => {
@@ -78,5 +99,24 @@ export const fetchProducts =
       dispatch(setProductLoading(false));
     }
   };
+
+// Async action creator for fetching single product details
+export const fetchProductDetails = (identifier) => async (dispatch) => {
+  try {
+    dispatch(setDetailsLoading(true));
+    dispatch(setDetailsError(null));
+
+    const response = await getProductDetailsAPI(identifier);
+    dispatch(setCurrentProduct(response.data));
+  } catch (error) {
+    dispatch(
+      setDetailsError(
+        error.response?.data?.message || "Failed to fetch product details",
+      ),
+    );
+  } finally {
+    dispatch(setDetailsLoading(false));
+  }
+};
 
 export default productSlice.reducer;

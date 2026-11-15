@@ -2,7 +2,13 @@ import { Router } from "express";
 import upload from "../config/multer.js";
 import validate from "../middlewares/validate.middleware.js";
 import { createProductSchema, updateProductSchema } from "../validations/product.validation.js";
-import { createProductController, deleteProductController, getProductsController, updateProductController } from "../controllers/product.controller.js";
+import {
+  createProductController,
+  deleteProductController,
+  getProductDetailsController,
+  getProductsController,
+  updateProductController,
+} from "../controllers/product.controller.js";
 
 const router = Router();
 
@@ -13,6 +19,7 @@ router.post(
   createProductController
 );
 router.get("/", getProductsController);
+router.get("/:identifier", getProductDetailsController);
 router.put(
   "/:id",
   upload.array("images", 5),

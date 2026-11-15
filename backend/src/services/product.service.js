@@ -673,3 +673,73 @@ export const deleteProductService = async (productId) => {
     deletedImages: publicIds.length,
   };
 };
+
+export const getProductDetailsService = async (identifier) => {
+  if (!identifier || typeof identifier !== "string" || !identifier.trim()) {
+    throw appError(400, "Product identifier is required");
+  }
+
+  const cleanIdentifier = identifier.trim();
+  const isNumeric = /^\d+$/.test(cleanIdentifier);
+
+  const whereClause = isNumeric
+    ? "p.id = ? AND p.is_active = TRUE"
+    : "p.slug = ? AND p.is_active = TRUE";
+
+  const param = isNumeric ? Number(cleanIdentifier) : cleanIdentifier;
+
+  const [products] = await pool.execute(
+    `SELECT
+       p.id,
+       p.name,
+       p.slug,
+       p.description,
+       p.price,
+       p.stock,
+       p.category_id,
+       p.is_active,
+       p.created_at,
+       p.updated_at,
+       c.name AS category_name,
+       c.slug AS category_slug
+     FROM products p
+     LEFT JOIN categories c ON p.category_id = c.id
+     WHERE ${whereClause}
+     LIMIT 1`,
+    [param],
+  );
+
+  if (products.length === 0) {
+    throw appError(404, "Product not found");
+  }
+
+  const product = products[0];
+
+  const [images] = await pool.execute(
+    `SELECT
+       id,
+       image_url,
+       public_id,
+       is_primary,
+       sort_order
+     FROM product_images
+     WHERE product_id = ?
+     ORDER BY is_primary DESC, sort_order ASC, id ASC`,
+    [product.id],
+  );
+
+  return {
+    ...product,
+    price: Number(product.price),
+    is_active: Boolean(product.is_active),
+    category: {
+      id: product.category_id,
+      name: product.category_name,
+      slug: product.category_slug,
+    },
+    images: images.map((image) => ({
+      ...image,
+      is_primary: Boolean(image.is_primary),
+    })),
+  };
+};

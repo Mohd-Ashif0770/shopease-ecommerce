@@ -1,6 +1,7 @@
 import {
   createProductService,
   deleteProductService,
+  getProductDetailsService,
   getProductsService,
   updateProductService,
 } from "../services/product.service.js";
@@ -26,7 +27,21 @@ export const getProductsController = async (req, res, next) => {
   }
 };
 
-//product details controller(s)
+//product details controller
+export const getProductDetailsController = async (req, res, next) => {
+  try {
+    const product = await getProductDetailsService(req.params.identifier);
+
+    return successResponse(
+      res,
+      200,
+      "Product details fetched successfully",
+      product,
+    );
+  } catch (error) {
+    return next(error);
+  }
+};
 
 export const updateProductController = async (req, res, next) => {
   try {

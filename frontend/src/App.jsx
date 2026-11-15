@@ -14,6 +14,7 @@ const VerifyResetOtp = lazy(() => import("./pages/VerifyResetOtp"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const PageLoader = lazy(() => import("./components/common/PageLoader"));
 const Products = lazy(() => import("./pages/Products"));
+const ProductDetails = lazy(() => import("./pages/ProductDetails"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const App = () => {
@@ -31,6 +32,7 @@ const App = () => {
           <Route path="/verify-reset-otp" element={<VerifyResetOtp />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/products" element={<Products />} />
+          <Route path="/products/:identifier" element={<ProductDetails />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         <Footer />
